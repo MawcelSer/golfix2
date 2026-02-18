@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pine: #0f2818;
+  --color-cream: #fafdf7;
+  --color-sage: #8fb89a;
+  --color-gold: #d4a843;
+  --color-water: #4a9fd4;
+  --color-sand: #d4b968;
+  --color-forest: #1b6b2e;
+  --color-green-mid: #2d8b47;
+  --color-green-light: #5cb85c;
+
+  --font-mono: "DM Mono", ui-monospace, monospace;
+}
