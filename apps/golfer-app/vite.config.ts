@@ -24,14 +24,10 @@ export default defineConfig({
         orientation: "portrait",
         icons: [
           {
-            src: "/icons/icon-192.png",
-            sizes: "192x192",
+            src: "/icons/app-logo.png",
+            sizes: "627x628",
             type: "image/png",
-          },
-          {
-            src: "/icons/icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
+            purpose: "any",
           },
         ],
       },

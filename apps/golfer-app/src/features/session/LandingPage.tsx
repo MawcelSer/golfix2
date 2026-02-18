@@ -61,6 +61,7 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-pine px-6 pt-12">
+      <img src="/icons/app-logo.png" alt="Golfix" className="mb-4 h-16 w-16 self-start" />
       <h1 className="mb-2 text-2xl font-semibold text-cream">
         Bienvenue{user?.displayName ? `, ${user.displayName}` : ""}
       </h1>

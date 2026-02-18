@@ -36,7 +36,8 @@ export function AnonymousScreen() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-pine px-6">
-      <h1 className="mb-8 text-2xl font-semibold text-cream">Jouer sans compte</h1>
+      <img src="/logo.png" alt="Golfix" className="mb-8 h-10" />
+      <h1 className="mb-6 text-2xl font-semibold text-cream">Jouer sans compte</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-cream">
