@@ -38,7 +38,7 @@ async function cleanTestData(): Promise<void> {
     DELETE FROM sessions
     WHERE user_id IN (
       SELECT id FROM users
-      WHERE email LIKE '%@test.golfix%'
+      WHERE email LIKE '%@test-session.golfix%'
     )
   `);
 
@@ -54,14 +54,14 @@ async function cleanTestData(): Promise<void> {
     DELETE FROM refresh_tokens
     WHERE user_id IN (
       SELECT id FROM users
-      WHERE email LIKE '%@test.golfix%'
+      WHERE email LIKE '%@test-session.golfix%'
     )
   `);
 
   // Delete test users
   await db.execute(sql`
     DELETE FROM users
-    WHERE email LIKE '%@test.golfix%'
+    WHERE email LIKE '%@test-session.golfix%'
   `);
 }
 
@@ -89,7 +89,7 @@ describe("Session routes", () => {
   describe("POST /sessions/start", () => {
     it("creates a session and returns 201", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-start@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-start@test-session.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -127,7 +127,7 @@ describe("Session routes", () => {
 
     it("returns 400 for invalid courseId", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-bad-id@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-bad-id@test-session.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -146,7 +146,7 @@ describe("Session routes", () => {
 
     it("returns 404 for non-existent course", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-no-course@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-no-course@test-session.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -169,7 +169,7 @@ describe("Session routes", () => {
   describe("GET /sessions/:id", () => {
     it("returns session data (200)", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-get@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-get@test-session.golfix.dev");
 
       // Start a session first
       const startResponse = await app.inject({
@@ -201,7 +201,7 @@ describe("Session routes", () => {
 
     it("returns 404 for non-existent session", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-get-404@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-get-404@test-session.golfix.dev");
 
       const response = await app.inject({
         method: "GET",
@@ -220,7 +220,7 @@ describe("Session routes", () => {
   describe("PATCH /sessions/:id/finish", () => {
     it("finishes a session (200)", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-finish@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-finish@test-session.golfix.dev");
 
       // Start a session first
       const startResponse = await app.inject({
@@ -252,7 +252,7 @@ describe("Session routes", () => {
 
     it("returns 409 when finishing an already-finished session", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-double-finish@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-double-finish@test-session.golfix.dev");
 
       // Start a session
       const startResponse = await app.inject({
@@ -290,7 +290,7 @@ describe("Session routes", () => {
 
     it("supports abandoned status", async () => {
       const app = await buildApp();
-      accessToken = await registerAndGetToken(app, "session-abandon@test.golfix.dev");
+      accessToken = await registerAndGetToken(app, "session-abandon@test-session.golfix.dev");
 
       // Start a session
       const startResponse = await app.inject({

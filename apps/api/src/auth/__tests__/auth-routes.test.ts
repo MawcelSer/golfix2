@@ -8,15 +8,25 @@ const BASE = "/api/v1/auth";
 // ── Cleanup ─────────────────────────────────────────────────────────
 
 async function cleanTestData(): Promise<void> {
-  // Delete refresh tokens for test users first (FK constraint)
+  const userFilter = sql`
+    SELECT id FROM users
+    WHERE email LIKE '%@test.golfix%' OR device_id LIKE 'test-%'
+  `;
+
+  // Delete in FK-dependency order
   await db.execute(sql`
-    DELETE FROM refresh_tokens
-    WHERE user_id IN (
-      SELECT id FROM users
-      WHERE email LIKE '%@test.golfix%' OR device_id LIKE 'test-%'
+    DELETE FROM positions WHERE session_id IN (
+      SELECT id FROM sessions WHERE user_id IN (${userFilter})
     )
   `);
-
+  await db.execute(sql`
+    DELETE FROM scores WHERE round_id IN (
+      SELECT id FROM rounds WHERE user_id IN (${userFilter})
+    )
+  `);
+  await db.execute(sql`DELETE FROM rounds WHERE user_id IN (${userFilter})`);
+  await db.execute(sql`DELETE FROM sessions WHERE user_id IN (${userFilter})`);
+  await db.execute(sql`DELETE FROM refresh_tokens WHERE user_id IN (${userFilter})`);
   await db.execute(sql`
     DELETE FROM users
     WHERE email LIKE '%@test.golfix%' OR device_id LIKE 'test-%'

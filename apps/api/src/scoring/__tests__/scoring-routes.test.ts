@@ -36,7 +36,7 @@ async function cleanTestData(): Promise<void> {
     WHERE round_id IN (
       SELECT id FROM rounds
       WHERE user_id IN (
-        SELECT id FROM users WHERE email LIKE '%@test.golfix%'
+        SELECT id FROM users WHERE email LIKE '%@test-scoring.golfix%'
       )
     )
   `);
@@ -45,7 +45,7 @@ async function cleanTestData(): Promise<void> {
   await db.execute(sql`
     DELETE FROM rounds
     WHERE user_id IN (
-      SELECT id FROM users WHERE email LIKE '%@test.golfix%'
+      SELECT id FROM users WHERE email LIKE '%@test-scoring.golfix%'
     )
   `);
 
@@ -53,7 +53,7 @@ async function cleanTestData(): Promise<void> {
   await db.execute(sql`
     DELETE FROM sessions
     WHERE user_id IN (
-      SELECT id FROM users WHERE email LIKE '%@test.golfix%'
+      SELECT id FROM users WHERE email LIKE '%@test-scoring.golfix%'
     )
   `);
 
@@ -68,13 +68,13 @@ async function cleanTestData(): Promise<void> {
   await db.execute(sql`
     DELETE FROM refresh_tokens
     WHERE user_id IN (
-      SELECT id FROM users WHERE email LIKE '%@test.golfix%'
+      SELECT id FROM users WHERE email LIKE '%@test-scoring.golfix%'
     )
   `);
 
   // Delete test users
   await db.execute(sql`
-    DELETE FROM users WHERE email LIKE '%@test.golfix%'
+    DELETE FROM users WHERE email LIKE '%@test-scoring.golfix%'
   `);
 }
 
@@ -104,7 +104,7 @@ describe("Scoring routes", () => {
   describe("POST /rounds", () => {
     it("creates a round and returns 201", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-create@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-create@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -128,7 +128,7 @@ describe("Scoring routes", () => {
 
     it("creates a round with sessionId", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-with-session@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-with-session@test-scoring.golfix.dev");
 
       // Start a session first
       const sessionRes = await app.inject({
@@ -171,7 +171,7 @@ describe("Scoring routes", () => {
 
     it("returns 400 for invalid courseId", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-bad-id@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-bad-id@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -190,7 +190,7 @@ describe("Scoring routes", () => {
 
     it("returns 404 for non-existent course", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-no-course@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-no-course@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "POST",
@@ -213,7 +213,7 @@ describe("Scoring routes", () => {
   describe("PUT /rounds/:id/scores", () => {
     it("creates a score and returns 200", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-upsert@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-upsert@test-scoring.golfix.dev");
 
       // Create a round
       const roundRes = await app.inject({
@@ -253,7 +253,7 @@ describe("Scoring routes", () => {
 
     it("updates an existing score (upsert)", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-update@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-update@test-scoring.golfix.dev");
 
       // Create a round
       const roundRes = await app.inject({
@@ -294,7 +294,7 @@ describe("Scoring routes", () => {
 
     it("returns 400 for invalid score data", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-bad-score@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-bad-score@test-scoring.golfix.dev");
 
       // Create a round
       const roundRes = await app.inject({
@@ -323,7 +323,7 @@ describe("Scoring routes", () => {
 
     it("returns 404 for non-existent round", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-no-round@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-no-round@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "PUT",
@@ -342,8 +342,8 @@ describe("Scoring routes", () => {
 
     it("returns 403 when modifying another user's round", async () => {
       const app = await buildApp();
-      const token1 = await registerAndGetToken(app, "scoring-owner@test.golfix.dev");
-      const token2 = await registerAndGetToken(app, "scoring-other@test.golfix.dev");
+      const token1 = await registerAndGetToken(app, "scoring-owner@test-scoring.golfix.dev");
+      const token2 = await registerAndGetToken(app, "scoring-other@test-scoring.golfix.dev");
 
       // User 1 creates a round
       const roundRes = await app.inject({
@@ -391,7 +391,7 @@ describe("Scoring routes", () => {
   describe("GET /users/me/rounds", () => {
     it("returns empty array for new user", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-list-empty@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-list-empty@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "GET",
@@ -410,7 +410,7 @@ describe("Scoring routes", () => {
 
     it("returns rounds with computed total strokes", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-list@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-list@test-scoring.golfix.dev");
 
       // Create a round and add scores
       const roundRes = await app.inject({
@@ -479,7 +479,7 @@ describe("Scoring routes", () => {
   describe("GET /rounds/:id", () => {
     it("returns round detail with scores", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-detail@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-detail@test-scoring.golfix.dev");
 
       // Create a round and add scores
       const roundRes = await app.inject({
@@ -528,7 +528,7 @@ describe("Scoring routes", () => {
 
     it("returns 404 for non-existent round", async () => {
       const app = await buildApp();
-      const token = await registerAndGetToken(app, "scoring-detail-404@test.golfix.dev");
+      const token = await registerAndGetToken(app, "scoring-detail-404@test-scoring.golfix.dev");
 
       const response = await app.inject({
         method: "GET",
@@ -546,8 +546,8 @@ describe("Scoring routes", () => {
 
     it("returns 403 for another user's round", async () => {
       const app = await buildApp();
-      const token1 = await registerAndGetToken(app, "scoring-detail-owner@test.golfix.dev");
-      const token2 = await registerAndGetToken(app, "scoring-detail-other@test.golfix.dev");
+      const token1 = await registerAndGetToken(app, "scoring-detail-owner@test-scoring.golfix.dev");
+      const token2 = await registerAndGetToken(app, "scoring-detail-other@test-scoring.golfix.dev");
 
       // User 1 creates a round
       const roundRes = await app.inject({
