@@ -10,9 +10,9 @@ import {
   registerUser,
   loginUser,
   registerAnonymous,
-  generateTokenPair,
-  verifyRefreshToken,
+  rotateRefreshToken,
   revokeRefreshToken,
+  AuthError,
 } from "./auth-service";
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -119,16 +119,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       }
 
       try {
-        const userId = await verifyRefreshToken(parsed.data.refreshToken);
-
-        // Revoke the old token (rotation)
-        await revokeRefreshToken(parsed.data.refreshToken);
-
-        // Issue new pair
-        const tokens = await generateTokenPair(userId);
+        const tokens = await rotateRefreshToken(parsed.data.refreshToken);
         return reply.status(200).send(tokens);
       } catch (error) {
-        if (error instanceof Error) {
+        if (error instanceof AuthError) {
           return reply
             .status(401)
             .send({ error: error.message, statusCode: 401 });

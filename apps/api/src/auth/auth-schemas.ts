@@ -3,13 +3,13 @@ import { z } from "zod";
 // ── Request schemas ─────────────────────────────────────────────────
 
 export const registerSchema = z.object({
-  email: z.string().email().max(255),
+  email: z.string().email().max(255).transform((e) => e.toLowerCase().trim()),
   password: z.string().min(8).max(128),
-  displayName: z.string().min(1).max(100),
+  displayName: z.string().min(1).max(100).transform((s) => s.trim()),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().transform((e) => e.toLowerCase().trim()),
   password: z.string().min(1),
 });
 

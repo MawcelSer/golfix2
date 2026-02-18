@@ -19,7 +19,11 @@ const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function getJwtSecret(): string {
-  return process.env.JWT_SECRET ?? "dev-secret-change-me";
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production");
+  }
+  return secret ?? "dev-secret-change-me";
 }
 
 // ── Password helpers ────────────────────────────────────────────────
@@ -112,6 +116,58 @@ export async function revokeRefreshToken(rawToken: string): Promise<void> {
     .update(refreshTokens)
     .set({ revokedAt: new Date() })
     .where(eq(refreshTokens.tokenHash, tokenHash));
+}
+
+/** Atomic refresh token rotation: verify + revoke + issue new pair in a transaction */
+export async function rotateRefreshToken(rawToken: string): Promise<AuthTokens> {
+  const tokenHash = hashToken(rawToken);
+
+  return await db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(refreshTokens)
+      .where(eq(refreshTokens.tokenHash, tokenHash))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) {
+      throw new AuthError("Invalid refresh token");
+    }
+    if (row.revokedAt !== null) {
+      throw new AuthError("Refresh token has been revoked");
+    }
+    if (row.expiresAt < new Date()) {
+      throw new AuthError("Refresh token has expired");
+    }
+
+    // Revoke old token
+    await tx
+      .update(refreshTokens)
+      .set({ revokedAt: new Date() })
+      .where(eq(refreshTokens.tokenHash, tokenHash));
+
+    // Issue new pair
+    const accessToken = generateAccessToken(row.userId);
+    const newRawToken = crypto.randomUUID();
+    const newHash = hashToken(newRawToken);
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+
+    await tx.insert(refreshTokens).values({
+      userId: row.userId,
+      tokenHash: newHash,
+      expiresAt,
+    });
+
+    return { accessToken, refreshToken: newRawToken };
+  });
+}
+
+/** Typed auth error to distinguish from unexpected errors */
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AuthError";
+  }
 }
 
 // ── Auth operations ─────────────────────────────────────────────────
