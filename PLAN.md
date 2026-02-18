@@ -2,8 +2,8 @@
 
 > Real-time golf course management platform: GPS distances, pace tracking, course manager dashboard.
 
-**Current sprint:** Sprint 2 — API, Auth & Real-time
-**Last completed task:** 1b.2 API dev mode simulation plugin (Sprint 1b complete)
+**Current sprint:** Sprint 3 — Pace Engine & Dashboard
+**Last completed task:** 2.13 Update PLAN.md + CLAUDE.md (Sprint 2 complete)
 
 ---
 

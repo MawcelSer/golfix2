@@ -7,8 +7,7 @@ export async function buildApp() {
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? "info",
-      transport:
-        process.env.NODE_ENV !== "production" ? { target: "pino-pretty" } : undefined,
+      transport: process.env.NODE_ENV !== "production" ? { target: "pino-pretty" } : undefined,
     },
   });
 
@@ -49,6 +48,21 @@ export async function buildApp() {
       api.get("/health", async () => {
         return { status: "ok", timestamp: new Date().toISOString() };
       });
+
+      const { authRoutes } = await import("./auth/auth-routes");
+      await api.register(authRoutes, { prefix: "/auth" });
+
+      const { courseRoutes } = await import("./courses/course-routes");
+      await api.register(courseRoutes, { prefix: "/courses" });
+
+      const { sessionRoutes } = await import("./sessions/session-routes");
+      await api.register(sessionRoutes, { prefix: "/sessions" });
+
+      const { positionRoutes } = await import("./positions/position-routes");
+      await api.register(positionRoutes, { prefix: "/positions" });
+
+      const { scoringRoutes } = await import("./scoring/scoring-routes");
+      await api.register(scoringRoutes);
     },
     { prefix: "/api/v1" },
   );
@@ -59,6 +73,11 @@ export async function buildApp() {
     const { simulationPlugin } = await import("./simulation/simulation-plugin");
     await app.register(simulationPlugin);
   }
+
+  // ── WebSocket (Socket.io) ───────────────────────────────────
+
+  const { setupSocketServer } = await import("./ws/socket-server");
+  setupSocketServer(app);
 
   return app;
 }

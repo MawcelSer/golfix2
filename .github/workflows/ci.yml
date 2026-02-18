@@ -14,6 +14,26 @@ jobs:
   lint-typecheck-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: golfix
+          POSTGRES_USER: golfix
+          POSTGRES_PASSWORD: golfix_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U golfix -d golfix"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://golfix:golfix_dev@localhost:5432/golfix
+      JWT_SECRET: ci-test-secret
+      NODE_ENV: test
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,8 +50,17 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Run migrations
+        run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
 
       - name: Test
         run: pnpm test

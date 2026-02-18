@@ -28,6 +28,7 @@ Dashboard  (React+Vite) ──── WebSocket/REST ──── Fastify API (No
 5. **Input validation**: Validate all external input with Zod
 6. **Test-first development**: Write tests before implementation
 7. **Git workflow**: Always make a feature branch before coding
+8. **Pre-commit checks**: ALWAYS run `pnpm lint` and `pnpm format:check` before committing. Fix with `pnpm format` if needed.
 
 ## Code Standards
 
@@ -60,8 +61,8 @@ Pace engine design: **`docs/plans/pace-engine-design.md`** (806 lines)
 **Always update `PLAN.md` after completing a task** (update "Current sprint" and "Last completed task" at the top).
 **Write sprint documentation** (what's implemented, how to test) in `docs/plans/` after completing a sprint.
 
-**Current sprint:** Sprint 2 — API, Auth & Real-time
-**Last completed task:** 1b.2 API dev mode simulation plugin (Sprint 1b complete)
+**Current sprint:** Sprint 3 — Pace Engine & Dashboard
+**Last completed task:** 2.13 Update PLAN.md + CLAUDE.md (Sprint 2 complete)
 
 > Update "Current sprint" and "Last completed task" here AND in PLAN.md after each task is done.
 

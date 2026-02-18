@@ -1,11 +1,6 @@
 import { AuthClient } from "./auth-client";
 import { SimLogger } from "./logger";
-import {
-  computeHole,
-  createRng,
-  gaussianNoise,
-  generateHoleWaypoints,
-} from "./path-generator";
+import { computeHole, createRng, gaussianNoise, generateHoleWaypoints } from "./path-generator";
 import { SessionManager } from "./session-manager";
 import { SimClock } from "./sim-clock";
 import { SocketClient } from "./socket-client";
@@ -100,10 +95,7 @@ function generateGroupWaypoints(
 // ── Dry run mode ────────────────────────────────────────────────────
 
 /** Run simulation without network — just generate and log waypoints */
-export function runDryMode(
-  scenario: ScenarioDefinition,
-  options: SimulatorOptions,
-): void {
+export function runDryMode(scenario: ScenarioDefinition, options: SimulatorOptions): void {
   const startTime = new Date();
   startTime.setHours(8, 0, 0, 0);
 
@@ -116,9 +108,7 @@ export function runDryMode(
 
   for (const group of scenario.groups) {
     const holeWaypoints = generateGroupWaypoints(group, startTime, options.seed ?? Date.now());
-    const groupStart = new Date(
-      startTime.getTime() + group.groupIndex * TEE_INTERVAL_MS,
-    );
+    const groupStart = new Date(startTime.getTime() + group.groupIndex * TEE_INTERVAL_MS);
 
     logger.info(
       `Groupe ${group.groupIndex + 1}: départ ${groupStart.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}, pace ${group.paceFactor}x`,
@@ -198,7 +188,9 @@ export async function runLiveSimulation(
         token: auth.accessToken,
       });
 
-      logger.info(`Groupe ${group.groupIndex + 1} connecté (session ${session.sessionId.slice(0, 8)}...)`);
+      logger.info(
+        `Groupe ${group.groupIndex + 1} connecté (session ${session.sessionId.slice(0, 8)}...)`,
+      );
     } catch (err) {
       logger.error(
         `Groupe ${group.groupIndex + 1} — échec connexion: ${err instanceof Error ? err.message : String(err)}`,
@@ -229,13 +221,7 @@ export async function runLiveSimulation(
     const holeWaypoints = allWaypoints.get(state.groupIndex)!;
     const socket = sockets[groupStates.indexOf(state)]!;
 
-    const promise = emitGroupPositions(
-      state,
-      holeWaypoints,
-      socket,
-      clock,
-      logger,
-    );
+    const promise = emitGroupPositions(state, holeWaypoints, socket, clock, logger);
     emissionPromises.push(promise);
   }
 
@@ -257,11 +243,7 @@ export async function runLiveSimulation(
     socket.disconnect();
   }
 
-  logger.summary(
-    18,
-    clock.formatSimElapsed(),
-    clock.formatRealElapsed(),
-  );
+  logger.summary(18, clock.formatSimElapsed(), clock.formatRealElapsed());
 }
 
 /** Emit positions for one group, respecting real-time pacing */
@@ -334,9 +316,7 @@ export async function runInternalSimulation(
 
   // Pre-generate all waypoints per group
   const groupData = scenario.groups.map((group) => {
-    const groupStart = new Date(
-      startTime.getTime() + group.groupIndex * TEE_INTERVAL_MS,
-    );
+    const groupStart = new Date(startTime.getTime() + group.groupIndex * TEE_INTERVAL_MS);
     const holeWaypoints = generateGroupWaypoints(group, groupStart, seed);
     return { group, holeWaypoints };
   });

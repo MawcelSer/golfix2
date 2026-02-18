@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 
 import { runInternalSimulation } from "./internal-engine";
 import { COURSE_NAME, HOLES_DATA } from "./seed-coords";
+import { positionBuffer } from "../positions/position-buffer";
 import type { PositionEvent } from "./types";
 
 /**
@@ -13,15 +14,11 @@ import type { PositionEvent } from "./types";
 export async function simulationPlugin(app: FastifyInstance): Promise<void> {
   const speed = parseInt(process.env.DEV_SIM_SPEED ?? "30", 10);
   const groupCount = parseInt(process.env.DEV_SIM_GROUPS ?? "4", 10);
-  const seed = process.env.DEV_SIM_SEED
-    ? parseInt(process.env.DEV_SIM_SEED, 10)
-    : undefined;
+  const seed = process.env.DEV_SIM_SEED ? parseInt(process.env.DEV_SIM_SEED, 10) : undefined;
 
   const abortController = new AbortController();
 
-  app.log.info(
-    `Simulation activée — ${COURSE_NAME}, ${groupCount} groupes, ${speed}x`,
-  );
+  app.log.info(`Simulation activée — ${COURSE_NAME}, ${groupCount} groupes, ${speed}x`);
 
   // Expose simulation status via REST
   app.get("/api/v1/simulation/status", async () => {
@@ -46,9 +43,13 @@ export async function simulationPlugin(app: FastifyInstance): Promise<void> {
       "Sim position",
     );
 
-    // TODO: Feed into PositionBuffer when it exists (Sprint 3)
-    // For now, just log the position. The PositionBuffer integration
-    // will be added when the buffer service is implemented.
+    positionBuffer.add({
+      sessionId: event.sessionId,
+      lat: event.lat,
+      lng: event.lng,
+      accuracy: event.accuracy,
+      recordedAt: event.recordedAt,
+    });
   };
 
   // Start simulation after server is ready
@@ -65,13 +66,15 @@ export async function simulationPlugin(app: FastifyInstance): Promise<void> {
       },
       handlePosition,
       abortController.signal,
-    ).then(() => {
-      app.log.info("Simulation terminée");
-    }).catch((err) => {
-      if (!abortController.signal.aborted) {
-        app.log.error(err, "Erreur simulation");
-      }
-    });
+    )
+      .then(() => {
+        app.log.info("Simulation terminée");
+      })
+      .catch((err) => {
+        if (!abortController.signal.aborted) {
+          app.log.error(err, "Erreur simulation");
+        }
+      });
   });
 
   // Clean shutdown

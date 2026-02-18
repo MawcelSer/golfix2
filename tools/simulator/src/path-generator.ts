@@ -16,12 +16,7 @@ function metersToLngDeg(meters: number, lat: number): number {
 }
 
 /** Haversine distance in meters between two lat/lng points */
-export function haversineDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number {
+export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const dLat = (lat2 - lat1) * DEG_TO_RAD;
   const dLng = (lng2 - lng1) * DEG_TO_RAD;
   const a =

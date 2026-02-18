@@ -128,10 +128,7 @@ export const rounds = pgTable(
     status: roundStatusEnum().default("in_progress").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [
-    index("idx_rounds_user").on(t.userId),
-    index("idx_rounds_course").on(t.courseId),
-  ],
+  (t) => [index("idx_rounds_user").on(t.userId), index("idx_rounds_course").on(t.courseId)],
 );
 
 // ── scores ─────────────────────────────────────────────────────────

@@ -6,8 +6,7 @@ import type { ScenarioDefinition } from "../types";
  */
 export const bottleneck: ScenarioDefinition = {
   name: "bottleneck",
-  description:
-    "Groupe 1 bloque le trou 2 (par 3) pendant 8 min — alerte bottleneck",
+  description: "Groupe 1 bloque le trou 2 (par 3) pendant 8 min — alerte bottleneck",
   groups: [
     {
       groupIndex: 0,
