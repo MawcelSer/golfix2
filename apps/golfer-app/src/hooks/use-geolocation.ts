@@ -47,6 +47,11 @@ export function useGeolocation(): GeolocationState {
       },
       (err) => {
         setError(codeToError(err.code));
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+          watchIdRef.current = null;
+        }
+        setWatching(false);
       },
       {
         enableHighAccuracy: true,

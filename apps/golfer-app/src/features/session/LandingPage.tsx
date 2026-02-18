@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiClient } from "@/services/api-client";
+import { apiClient, ApiError } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { GdprConsentModal } from "@/features/consent/GdprConsentModal";
@@ -19,43 +19,55 @@ export function LandingPage() {
 
   useEffect(() => {
     apiClient
-      .get<RoundSummaryResponse[]>("/rounds/users/me/rounds")
+      .get<RoundSummaryResponse[]>("/users/me/rounds")
       .then(setRounds)
-      .catch(() => {
-        /* offline — show empty */
+      .catch((err: unknown) => {
+        if (err instanceof ApiError && err.status === 401) return;
+        console.error("Failed to fetch rounds:", err);
       });
   }, []);
 
-  async function handleStart() {
-    if (!gdprConsent) {
-      setShowGdpr(true);
+  const locateCourse = useCallback(async () => {
+    if (!position) {
+      startWatching();
+      setLocateMessage("Acquisition GPS en cours…");
+      setLoading(false);
       return;
     }
 
     setLoading(true);
     setLocateMessage(null);
 
-    if (!position) {
-      startWatching();
-    }
-
-    const currentPos = position ?? { lat: 0, lng: 0 };
-
     try {
-      const result = await apiClient.post<CourseMatch | null>("/courses/locate", {
-        lat: currentPos.lat,
-        lng: currentPos.lng,
+      const result = await apiClient.post<CourseMatch>("/courses/locate", {
+        lat: position.lat,
+        lng: position.lng,
       });
-
-      if (result) {
-        navigate(`/gps?course=${result.slug}`);
-      } else {
+      navigate(`/gps?course=${result.slug}`);
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status === 404) {
         setLocateMessage("Vous n'êtes pas sur un parcours");
+      } else {
+        setLocateMessage("Erreur de localisation");
+        console.error("Locate failed:", err);
       }
-    } catch {
-      setLocateMessage("Erreur de localisation");
     } finally {
       setLoading(false);
+    }
+  }, [position, startWatching, navigate]);
+
+  function handleStart() {
+    if (!gdprConsent) {
+      setShowGdpr(true);
+      return;
+    }
+    locateCourse();
+  }
+
+  function handleGdprClose() {
+    setShowGdpr(false);
+    if (useAuthStore.getState().gdprConsent) {
+      locateCourse();
     }
   }
 
@@ -98,12 +110,7 @@ export function LandingPage() {
         </div>
       )}
 
-      <GdprConsentModal
-        open={showGdpr}
-        onClose={() => {
-          setShowGdpr(false);
-        }}
-      />
+      <GdprConsentModal open={showGdpr} onClose={handleGdprClose} />
     </div>
   );
 }

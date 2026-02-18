@@ -86,7 +86,7 @@ describe("useGeolocation", () => {
     });
   });
 
-  test("sets error on permission denied", () => {
+  test("sets error on permission denied and stops watching", () => {
     const { result } = renderHook(() => useGeolocation());
 
     act(() => {
@@ -98,6 +98,29 @@ describe("useGeolocation", () => {
     });
 
     expect(result.current.error).toBe("permission_denied");
+    expect(result.current.watching).toBe(false);
+    expect(navigator.geolocation.clearWatch).toHaveBeenCalled();
+  });
+
+  test("can retry startWatching after error", () => {
+    const { result } = renderHook(() => useGeolocation());
+
+    act(() => {
+      result.current.startWatching();
+    });
+
+    act(() => {
+      simulateError(3, "Timeout");
+    });
+
+    expect(result.current.watching).toBe(false);
+
+    act(() => {
+      result.current.startWatching();
+    });
+
+    expect(result.current.watching).toBe(true);
+    expect(navigator.geolocation.watchPosition).toHaveBeenCalledTimes(2);
   });
 
   test("stopWatching clears the watch", () => {

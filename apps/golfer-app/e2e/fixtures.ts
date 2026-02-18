@@ -18,10 +18,9 @@ export const MOCK_ROUNDS = [
 ];
 
 export const MOCK_COURSE_MATCH = {
-  id: "course-1",
+  courseId: "course-1",
   slug: "royal-golf-marrakech",
   name: "Royal Golf Marrakech",
-  distanceMetres: 42,
 };
 
 /** Intercept all /api/v1 calls with appropriate mock responses. */
@@ -50,7 +49,7 @@ export async function mockApi(page: Page) {
     }),
   );
 
-  await page.route("**/api/v1/rounds/users/me/rounds", (route) =>
+  await page.route("**/api/v1/users/me/rounds", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",

@@ -28,8 +28,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({ message: "Request failed" }));
-    throw new ApiError(data.message ?? "Request failed", response.status);
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(data.error ?? data.message ?? "Request failed", response.status);
   }
 
   return response.json() as Promise<T>;

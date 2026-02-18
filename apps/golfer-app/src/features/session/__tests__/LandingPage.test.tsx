@@ -4,11 +4,21 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { LandingPage } from "../LandingPage";
 import { useAuthStore } from "@/stores/auth-store";
+import { ApiError } from "@/services/api-client";
 
 vi.mock("@/services/api-client", () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+  },
+  ApiError: class ApiError extends Error {
+    constructor(
+      message: string,
+      public status: number,
+    ) {
+      super(message);
+      this.name = "ApiError";
+    }
   },
 }));
 
@@ -89,10 +99,25 @@ describe("LandingPage", () => {
     });
   });
 
-  test("shows off-course message when locate fails", async () => {
+  test("fetches rounds from correct API path", async () => {
     const { apiClient } = await import("@/services/api-client");
     vi.mocked(apiClient.get).mockResolvedValue([]);
-    vi.mocked(apiClient.post).mockResolvedValue(null);
+
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>,
+    );
+
+    expect(apiClient.get).toHaveBeenCalledWith("/users/me/rounds");
+  });
+
+  test("shows off-course message when locate returns 404", async () => {
+    const { apiClient } = await import("@/services/api-client");
+    vi.mocked(apiClient.get).mockResolvedValue([]);
+    vi.mocked(apiClient.post).mockRejectedValue(new ApiError("Not found", 404));
+
+    useAuthStore.getState().acceptGdpr();
 
     const user = userEvent.setup();
     render(
@@ -101,13 +126,31 @@ describe("LandingPage", () => {
       </MemoryRouter>,
     );
 
-    // Need GDPR consent for the button to work
-    useAuthStore.getState().acceptGdpr();
-
     await user.click(screen.getByRole("button", { name: /démarrer/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/pas sur un parcours/i)).toBeInTheDocument();
+    });
+  });
+
+  test("shows generic error for non-404 failures", async () => {
+    const { apiClient } = await import("@/services/api-client");
+    vi.mocked(apiClient.get).mockResolvedValue([]);
+    vi.mocked(apiClient.post).mockRejectedValue(new Error("Network error"));
+
+    useAuthStore.getState().acceptGdpr();
+
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("button", { name: /démarrer/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/erreur de localisation/i)).toBeInTheDocument();
     });
   });
 });

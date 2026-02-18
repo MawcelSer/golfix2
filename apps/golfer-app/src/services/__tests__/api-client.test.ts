@@ -64,7 +64,7 @@ describe("apiClient", () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
-      json: () => Promise.resolve({ message: "Invalid credentials" }),
+      json: () => Promise.resolve({ error: "Invalid credentials", statusCode: 401 }),
     });
     vi.stubGlobal("fetch", mockFetch);
 
