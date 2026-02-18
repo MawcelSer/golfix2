@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Golfix — Option A: Augusta Caddie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pine: #0F2818;
+    --pine-deep: #091A10;
+    --cream: #FAFDF7;
+    --sage: #8FB89A;
+    --gold: #D4A843;
+    --gold-dim: rgba(212, 168, 67, 0.15);
+    --water: #4A9FD4;
+    --sand: #D4B968;
+    --white: #FFFFFF;
+    --white-60: rgba(255,255,255,0.6);
+    --white-20: rgba(255,255,255,0.2);
+    --pine-95: rgba(15, 40, 24, 0.95);
+    --pine-80: rgba(15, 40, 24, 0.80);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: var(--pine-deep);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Hole Navigation Bar ── */
+  .hole-nav {
+    height: 52px;
+    background: var(--pine);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .hole-nav .arrow {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sage);
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .hole-nav .arrow:hover { background: var(--white-20); }
+
+  .hole-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white-60);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .hole-info .hole-number {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .hole-info .dot {
+    color: var(--sage);
+    opacity: 0.4;
+  }
+
+  /* ── Satellite Map Area ── */
+  .map-area {
+    height: 420px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 60% 75%, rgba(34, 85, 34, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 30% 30%, rgba(20, 60, 20, 0.4) 0%, transparent 60%),
+      linear-gradient(160deg, #1a3d1a 0%, #0d2610 30%, #142e14 60%, #0a1f0a 100%);
+    overflow: hidden;
+  }
+
+  /* Simulated course features */
+  .map-area::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    width: 80px;
+    height: 60px;
+    background: radial-gradient(ellipse, #2d6b2d 0%, #1e4d1e 40%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Fairway */
+  .fairway {
+    position: absolute;
+    top: 15%;
+    left: 35%;
+    width: 100px;
+    height: 350px;
+    background: linear-gradient(180deg, rgba(40, 90, 40, 0.3) 0%, rgba(45, 107, 45, 0.5) 50%, rgba(50, 120, 50, 0.4) 100%);
+    border-radius: 40px 40px 50% 50%;
+    transform: rotate(-5deg);
+  }
+
+  /* Green */
+  .green-shape {
+    position: absolute;
+    top: 55%;
+    left: 42%;
+    width: 65px;
+    height: 50px;
+    background: radial-gradient(ellipse, #3a8a3a 0%, #2d7a2d 50%, rgba(45, 122, 45, 0) 100%);
+    border-radius: 50%;
+    border: 1px solid rgba(80, 160, 80, 0.3);
+  }
+
+  /* Green pin */
+  .green-pin {
+    position: absolute;
+    top: 53%;
+    left: 48%;
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(212, 168, 67, 0.6);
+    z-index: 5;
+  }
+
+  .green-pin::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 8px;
+    background: var(--gold);
+  }
+
+  /* Bunker */
+  .bunker {
+    position: absolute;
+    width: 25px;
+    height: 18px;
+    background: radial-gradient(ellipse, var(--sand) 0%, rgba(212, 185, 104, 0.3) 100%);
+    border-radius: 50%;
+  }
+  .bunker-1 { top: 58%; left: 30%; }
+  .bunker-2 { top: 50%; left: 60%; transform: scale(0.8); }
+
+  /* Water */
+  .water-hazard {
+    position: absolute;
+    top: 35%;
+    left: 15%;
+    width: 60px;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(74, 159, 212, 0.4) 0%, rgba(74, 159, 212, 0.1) 100%);
+    border-radius: 50%;
+    border: 1px solid rgba(74, 159, 212, 0.2);
+  }
+
+  /* User position */
+  .user-marker {
+    position: absolute;
+    top: 25%;
+    left: 40%;
+    z-index: 6;
+  }
+
+  .user-dot {
+    width: 14px;
+    height: 14px;
+    background: #3B82F6;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+    position: relative;
+    z-index: 2;
+  }
+
+  .user-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.15);
+    animation: pulse 2s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  }
+
+  /* Distance line */
+  .distance-line {
+    position: absolute;
+    top: 25%;
+    left: 44%;
+    width: 2px;
+    height: 210px;
+    z-index: 4;
+    transform: rotate(5deg);
+    transform-origin: top center;
+  }
+
+  .distance-line::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.7) 0px,
+      rgba(255,255,255,0.7) 6px,
+      transparent 6px,
+      transparent 14px
+    );
+  }
+
+  .distance-label {
+    position: absolute;
+    top: 40%;
+    left: 52%;
+    background: rgba(15, 40, 24, 0.85);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    z-index: 5;
+    letter-spacing: 0.03em;
+  }
+
+  /* Gradient fade from map to distance panel */
+  .map-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent 0%, var(--pine-95) 100%);
+    z-index: 7;
+  }
+
+  /* ── Distance Panel ── */
+  .distance-panel {
+    background: var(--pine-95);
+    padding: 0 20px 16px;
+    position: relative;
+    z-index: 8;
+    margin-top: -1px;
+  }
+
+  .distance-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .distance-item {
+    text-align: center;
+    flex: 1;
+  }
+
+  .distance-label-text {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 4px;
+  }
+
+  .distance-value {
+    font-family: 'DM Mono', monospace;
+    color: var(--white);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .distance-item.front .distance-value,
+  .distance-item.back .distance-value {
+    font-size: 28px;
+    opacity: 0.85;
+  }
+
+  .distance-item.center .distance-value {
+    font-size: 46px;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+
+  .distance-unit {
+    font-size: 14px;
+    color: var(--sage);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    margin-left: 2px;
+  }
+
+  /* ── Score Entry (Collapsed) ── */
+  .score-entry {
+    background: var(--cream);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(15, 40, 24, 0.08);
+  }
+
+  .score-hole-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pine);
+    opacity: 0.6;
+  }
+
+  .score-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .score-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(15, 40, 24, 0.15);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--pine);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .score-btn:active {
+    background: var(--pine);
+    color: white;
+    transform: scale(0.95);
+  }
+
+  .score-current {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--pine);
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .score-expand {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sage);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* ── Expanded Score ── */
+  .score-expanded {
+    background: var(--cream);
+    padding: 0 20px 14px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-mini-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .score-mini-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pine);
+    opacity: 0.4;
+  }
+
+  .score-mini-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(15, 40, 24, 0.12);
+    background: white;
+    font-size: 14px;
+    color: var(--pine);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .score-mini-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    color: var(--pine);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .toggle-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: white;
+    border: 1px solid rgba(15, 40, 24, 0.1);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--pine);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toggle-pill.active {
+    background: var(--pine);
+    color: var(--cream);
+    opacity: 1;
+    border-color: var(--pine);
+  }
+
+  .toggle-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── Bottom Tab Bar ── */
+  .tab-bar {
+    height: 64px;
+    background: var(--pine-deep);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-bottom: 8px;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 20px;
+  }
+
+  .tab-icon {
+    font-size: 20px;
+    opacity: 0.4;
+    transition: all 0.2s;
+  }
+
+  .tab-item.active .tab-icon { opacity: 1; }
+
+  .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--sage);
+    opacity: 0.4;
+  }
+
+  .tab-item.active .tab-label {
+    color: var(--gold);
+    opacity: 1;
+  }
+
+  .tab-item.active .tab-icon {
+    color: var(--gold);
+  }
+
+  .tab-active-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin-top: 2px;
+  }
+
+  /* ── Title ── */
+  .mockup-title {
+    color: #999;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    margin-top: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mockup-subtitle {
+    color: #666;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div>
+<div class="phone-frame">
+  <!-- Hole Navigation -->
+  <div class="hole-nav">
+    <div class="arrow">&#9664;</div>
+    <div class="hole-info">
+      <span class="hole-number">Trou 7</span>
+      <span class="dot">&middot;</span>
+      <span>Par 4</span>
+      <span class="dot">&middot;</span>
+      <span>385m</span>
+    </div>
+    <div class="arrow">&#9654;</div>
+  </div>
+
+  <!-- Map Area -->
+  <div class="map-area">
+    <div class="fairway"></div>
+    <div class="water-hazard"></div>
+    <div class="green-shape"></div>
+    <div class="green-pin"></div>
+    <div class="bunker bunker-1"></div>
+    <div class="bunker bunker-2"></div>
+
+    <!-- User marker -->
+    <div class="user-marker">
+      <div class="user-pulse"></div>
+      <div class="user-dot"></div>
+    </div>
+
+    <!-- Distance line -->
+    <div class="distance-line"></div>
+    <div class="distance-label">142m</div>
+
+    <!-- Gradient fade -->
+    <div class="map-fade"></div>
+  </div>
+
+  <!-- Distance Panel -->
+  <div class="distance-panel">
+    <div class="distance-row">
+      <div class="distance-item front">
+        <div class="distance-label-text">Avant</div>
+        <div class="distance-value">128</div>
+      </div>
+      <div class="distance-item center">
+        <div class="distance-label-text">Centre</div>
+        <div class="distance-value">142<span class="distance-unit">m</span></div>
+      </div>
+      <div class="distance-item back">
+        <div class="distance-label-text">Fond</div>
+        <div class="distance-value">156</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Entry (Collapsed) -->
+  <div class="score-entry">
+    <div class="score-hole-label">Trou 7</div>
+    <div class="score-center">
+      <div class="score-btn">&minus;</div>
+      <div class="score-current">4</div>
+      <div class="score-btn">+</div>
+    </div>
+    <div class="score-expand">&#9660;</div>
+  </div>
+
+  <!-- Score Expanded -->
+  <div class="score-expanded">
+    <div class="score-mini-group">
+      <div class="score-mini-label">Putts</div>
+      <div class="score-mini-btn">&minus;</div>
+      <div class="score-mini-value">2</div>
+      <div class="score-mini-btn">+</div>
+    </div>
+    <div class="toggle-pill active">
+      <div class="toggle-dot"></div>
+      FIR
+    </div>
+    <div class="toggle-pill">
+      <div class="toggle-dot"></div>
+      GIR
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="tab-icon">&#9737;</div>
+      <div class="tab-label">GPS</div>
+      <div class="tab-active-dot"></div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">&#9638;</div>
+      <div class="tab-label">Carte</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">&#9673;</div>
+      <div class="tab-label">Profil</div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup-title">Option A &mdash; Augusta Caddie</div>
+<div class="mockup-subtitle">Classic club aesthetic &bull; Dark pine + cream split-tone &bull; Gradient map fade</div>
+</div>
+
+</body>
+</html>

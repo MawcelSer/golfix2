@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Golfix — Option C: Links Tradition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Crimson+Pro:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ivory: #F5F0E8;
+    --ivory-warm: #EDE7DC;
+    --parchment: #E8E0D4;
+    --dark: #1C2820;
+    --dark-soft: #2A3830;
+    --forest: #1E3A28;
+    --moss: #3D6B4A;
+    --moss-light: rgba(61, 107, 74, 0.12);
+    --copper: #B87333;
+    --copper-dim: rgba(184, 115, 51, 0.15);
+    --copper-glow: rgba(184, 115, 51, 0.3);
+    --water: #5B8FA8;
+    --sand: #C4A265;
+    --text: #1C2820;
+    --text-soft: rgba(28, 40, 32, 0.55);
+    --text-on-dark: #E8E0D4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: var(--ivory);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.15);
+  }
+
+  /* ── Hole Navigation ── */
+  .hole-nav {
+    height: 60px;
+    background: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .hole-nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(184, 115, 51, 0.3), transparent);
+  }
+
+  .arrow {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-on-dark);
+    font-size: 14px;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .arrow:hover { opacity: 1; }
+
+  .hole-center {
+    text-align: center;
+  }
+
+  .hole-number-big {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--copper);
+    letter-spacing: 0.03em;
+    line-height: 1;
+  }
+
+  .hole-meta {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-on-dark);
+    opacity: 0.45;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── Map ── */
+  .map-area {
+    height: 360px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 55% 65%, rgba(30, 58, 40, 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 25% 30%, rgba(20, 45, 25, 0.4) 0%, transparent 50%),
+      linear-gradient(165deg, #162a1a 0%, #0f1e12 35%, #1a3020 65%, #0d1a10 100%);
+    overflow: hidden;
+  }
+
+  .fairway {
+    position: absolute;
+    top: 10%;
+    left: 34%;
+    width: 105px;
+    height: 330px;
+    background: linear-gradient(180deg, rgba(40, 80, 45, 0.2) 0%, rgba(50, 100, 55, 0.3) 50%, rgba(45, 90, 50, 0.25) 100%);
+    border-radius: 45px 45px 50% 50%;
+    transform: rotate(-4deg);
+  }
+
+  .green-shape {
+    position: absolute;
+    top: 52%;
+    left: 40%;
+    width: 68px;
+    height: 52px;
+    background: radial-gradient(ellipse, rgba(50, 100, 50, 0.5) 0%, rgba(40, 80, 40, 0.2) 60%, transparent 100%);
+    border-radius: 50%;
+    border: 1.5px solid rgba(61, 107, 74, 0.2);
+  }
+
+  .green-flag {
+    position: absolute;
+    top: 49%;
+    left: 47%;
+    z-index: 5;
+  }
+
+  .flag-pole {
+    width: 1.5px;
+    height: 22px;
+    background: var(--ivory);
+    margin: 0 auto;
+    opacity: 0.8;
+  }
+
+  .flag-cloth {
+    width: 12px;
+    height: 8px;
+    background: var(--copper);
+    position: absolute;
+    top: 0;
+    left: 2px;
+    clip-path: polygon(0 0, 100% 30%, 0 100%);
+  }
+
+  .flag-base {
+    width: 6px;
+    height: 6px;
+    background: var(--ivory);
+    border-radius: 50%;
+    margin: 0 auto;
+    opacity: 0.9;
+  }
+
+  .bunker {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(196, 162, 101, 0.3) 0%, transparent 80%);
+    border: 1px solid rgba(196, 162, 101, 0.12);
+  }
+  .bunker-1 { top: 56%; left: 28%; width: 26px; height: 20px; }
+  .bunker-2 { top: 48%; left: 62%; width: 22px; height: 16px; }
+
+  .water-hazard {
+    position: absolute;
+    top: 32%;
+    left: 12%;
+    width: 60px;
+    height: 38px;
+    background: radial-gradient(ellipse, rgba(91, 143, 168, 0.25) 0%, transparent 80%);
+    border-radius: 50%;
+    border: 1px solid rgba(91, 143, 168, 0.12);
+  }
+
+  /* User */
+  .user-marker {
+    position: absolute;
+    top: 22%;
+    left: 38%;
+    z-index: 6;
+  }
+
+  .user-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--ivory);
+    border: 3px solid var(--copper);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--copper-glow);
+    position: relative;
+    z-index: 2;
+  }
+
+  .user-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(184, 115, 51, 0.3);
+    animation: ring-pulse 2.5s ease-out infinite;
+  }
+
+  @keyframes ring-pulse {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+  }
+
+  /* Distance line */
+  .dist-line {
+    position: absolute;
+    top: 23%;
+    left: 43%;
+    width: 1.5px;
+    height: 220px;
+    z-index: 4;
+    transform: rotate(4deg);
+    transform-origin: top;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(245, 240, 232, 0.5) 0px,
+      rgba(245, 240, 232, 0.5) 5px,
+      transparent 5px,
+      transparent 13px
+    );
+  }
+
+  .dist-badge-on-line {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ivory);
+    background: rgba(28, 40, 32, 0.8);
+    padding: 2px 8px;
+    border-radius: 3px;
+    z-index: 5;
+    letter-spacing: 0.04em;
+    border: 1px solid rgba(184, 115, 51, 0.2);
+  }
+
+  /* ── Distance Display — Card Style ── */
+  .distance-section {
+    background: var(--ivory);
+    padding: 20px 24px 16px;
+    position: relative;
+  }
+
+  .distance-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--parchment), transparent);
+  }
+
+  .distance-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .dist-col {
+    text-align: center;
+    flex: 1;
+  }
+
+  .dist-col-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+  }
+
+  .dist-col-value {
+    font-family: 'Fira Code', monospace;
+    font-weight: 500;
+    color: var(--dark);
+    line-height: 1;
+  }
+
+  .dist-col.side .dist-col-value {
+    font-size: 28px;
+    opacity: 0.55;
+  }
+
+  .dist-col.main .dist-col-value {
+    font-size: 52px;
+    color: var(--forest);
+  }
+
+  .dist-col.main .dist-col-label {
+    color: var(--copper);
+  }
+
+  .dist-m {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-soft);
+    margin-left: 2px;
+  }
+
+  .dist-divider {
+    width: 1px;
+    height: 50px;
+    background: var(--parchment);
+    flex: 0;
+    margin: 0 8px;
+    align-self: center;
+  }
+
+  /* Par indicator */
+  .par-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--parchment);
+  }
+
+  .par-indicator {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--moss);
+    letter-spacing: 0.06em;
+    background: var(--moss-light);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  /* ── Score Entry ── */
+  .score-section {
+    background: var(--ivory-warm);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--parchment);
+  }
+
+  .score-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dark-soft);
+  }
+
+  .score-input {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sc-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid var(--parchment);
+    background: var(--ivory);
+    color: var(--dark);
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .sc-btn:active {
+    background: var(--forest);
+    color: var(--ivory);
+    border-color: var(--forest);
+    transform: scale(0.95);
+  }
+
+  .sc-val {
+    font-family: 'Fira Code', monospace;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--dark);
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .score-chevron {
+    color: var(--text-soft);
+    font-size: 12px;
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  /* Expanded */
+  .score-detail {
+    background: var(--ivory-warm);
+    padding: 0 24px 14px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detail-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .detail-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+
+  .detail-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--parchment);
+    background: var(--ivory);
+    color: var(--dark-soft);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .detail-val {
+    font-family: 'Fira Code', monospace;
+    font-size: 18px;
+    color: var(--dark);
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .stat-pill {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1.5px solid var(--parchment);
+    background: var(--ivory);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .stat-pill.on {
+    background: var(--copper-dim);
+    border-color: var(--copper);
+    color: var(--copper);
+  }
+
+  /* ── Tab Bar ── */
+  .tab-bar {
+    height: 68px;
+    background: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: 8px;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 24px;
+  }
+
+  .tab-ico {
+    font-size: 18px;
+    color: var(--text-on-dark);
+    opacity: 0.35;
+    transition: all 0.2s;
+  }
+
+  .tab-item.active .tab-ico {
+    opacity: 1;
+    color: var(--copper);
+  }
+
+  .tab-name {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-on-dark);
+    opacity: 0.35;
+  }
+
+  .tab-item.active .tab-name {
+    color: var(--copper);
+    opacity: 1;
+  }
+
+  .tab-item.active::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--copper);
+    position: absolute;
+    margin-top: -8px;
+  }
+
+  /* ── Labels ── */
+  .mockup-title {
+    color: #999;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    margin-top: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mockup-subtitle {
+    color: #666;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div>
+<div class="phone-frame">
+  <!-- Hole Nav -->
+  <div class="hole-nav">
+    <div class="arrow">&#9664;</div>
+    <div class="hole-center">
+      <div class="hole-number-big">Trou 7</div>
+      <div class="hole-meta">Par 4 &middot; 385m</div>
+    </div>
+    <div class="arrow">&#9654;</div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-area">
+    <div class="fairway"></div>
+    <div class="water-hazard"></div>
+    <div class="green-shape"></div>
+    <div class="green-flag">
+      <div class="flag-cloth"></div>
+      <div class="flag-pole"></div>
+      <div class="flag-base"></div>
+    </div>
+    <div class="bunker bunker-1"></div>
+    <div class="bunker bunker-2"></div>
+
+    <div class="user-marker">
+      <div class="user-ring"></div>
+      <div class="user-dot"></div>
+    </div>
+
+    <div class="dist-line"></div>
+    <div class="dist-badge-on-line">142m</div>
+  </div>
+
+  <!-- Distance Display -->
+  <div class="distance-section">
+    <div class="distance-row">
+      <div class="dist-col side">
+        <div class="dist-col-label">Avant</div>
+        <div class="dist-col-value">128</div>
+      </div>
+      <div class="dist-divider"></div>
+      <div class="dist-col main">
+        <div class="dist-col-label">Centre</div>
+        <div class="dist-col-value">142<span class="dist-m">m</span></div>
+      </div>
+      <div class="dist-divider"></div>
+      <div class="dist-col side">
+        <div class="dist-col-label">Fond</div>
+        <div class="dist-col-value">156</div>
+      </div>
+    </div>
+    <div class="par-line">
+      <div class="par-indicator">&#9679; Sur le pace</div>
+    </div>
+  </div>
+
+  <!-- Score Entry -->
+  <div class="score-section">
+    <div class="score-label">Score</div>
+    <div class="score-input">
+      <div class="sc-btn">&minus;</div>
+      <div class="sc-val">4</div>
+      <div class="sc-btn">+</div>
+    </div>
+    <div class="score-chevron">&#9660;</div>
+  </div>
+
+  <div class="score-detail">
+    <div class="detail-group">
+      <div class="detail-label">Putts</div>
+      <div class="detail-btn">&minus;</div>
+      <div class="detail-val">2</div>
+      <div class="detail-btn">+</div>
+    </div>
+    <div class="stat-pill on">FIR</div>
+    <div class="stat-pill">GIR</div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="tab-ico">&#9737;</div>
+      <div class="tab-name">GPS</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-ico">&#9638;</div>
+      <div class="tab-name">Carte</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-ico">&#9673;</div>
+      <div class="tab-name">Profil</div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup-title">Option C &mdash; Links Tradition</div>
+<div class="mockup-subtitle">Light ivory + dark accents &bull; Serif headers &bull; Copper accent &bull; Editorial / old-money golf club</div>
+</div>
+
+</body>
+</html>
