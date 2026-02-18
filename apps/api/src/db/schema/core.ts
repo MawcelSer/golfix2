@@ -39,6 +39,7 @@ export const users = pgTable(
   },
   (t) => [
     check("users_identity_check", sql`${t.email} IS NOT NULL OR ${t.deviceId} IS NOT NULL`),
+    unique("users_email_unique").on(t.email),
   ],
 );
 

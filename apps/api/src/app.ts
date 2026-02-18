@@ -49,6 +49,9 @@ export async function buildApp() {
       api.get("/health", async () => {
         return { status: "ok", timestamp: new Date().toISOString() };
       });
+
+      const { authRoutes } = await import("./auth/auth-routes");
+      await api.register(authRoutes, { prefix: "/auth" });
     },
     { prefix: "/api/v1" },
   );
