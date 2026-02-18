@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { sql, eq } from "drizzle-orm";
 import { db } from "../../db/connection";
-import { sessions, positions, users, courses } from "../../db/schema/index";
+import { sessions, positions, users } from "../../db/schema/index";
 import { InMemoryPositionBuffer, type PositionInput } from "../position-buffer";
 
 // ── Test fixtures ─────────────────────────────────────────────────

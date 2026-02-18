@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 
 import { runInternalSimulation } from "./internal-engine";
 import { COURSE_NAME, HOLES_DATA } from "./seed-coords";
+import { positionBuffer } from "../positions/position-buffer";
 import type { PositionEvent } from "./types";
 
 /**
@@ -46,9 +47,13 @@ export async function simulationPlugin(app: FastifyInstance): Promise<void> {
       "Sim position",
     );
 
-    // TODO: Feed into PositionBuffer when it exists (Sprint 3)
-    // For now, just log the position. The PositionBuffer integration
-    // will be added when the buffer service is implemented.
+    positionBuffer.add({
+      sessionId: event.sessionId,
+      lat: event.lat,
+      lng: event.lng,
+      accuracy: event.accuracy,
+      recordedAt: event.recordedAt,
+    });
   };
 
   // Start simulation after server is ready

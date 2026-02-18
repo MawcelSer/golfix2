@@ -1,4 +1,4 @@
-import { eq, and, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../db/connection";
 import { rounds, scores, courses, sessions } from "../db/schema/index";
 import type {

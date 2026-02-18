@@ -10,9 +10,9 @@ export interface SocketAuthData {
 }
 
 declare module "socket.io" {
-  interface Socket {
-    data: SocketAuthData;
-  }
+  // Extend the built-in SocketData to include our auth fields
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface SocketData extends SocketAuthData {}
 }
 
 // ── Room validation ────────────────────────────────────────────────

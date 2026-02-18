@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { sql, eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { io as createClient, type Socket as ClientSocket } from "socket.io-client";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "../../app";
 import { db } from "../../db/connection";
-import { users, sessions, courses, positions } from "../../db/schema/index";
+import { users, sessions } from "../../db/schema/index";
 import { generateAccessToken } from "../../auth/auth-service";
 
 // ── Test state ────────────────────────────────────────────────────
