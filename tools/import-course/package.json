@@ -1,0 +1,17 @@
+{
+  "name": "@golfix/import-course",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@golfix/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@golfix/eslint-config": "workspace:*",
+    "typescript": "^5.7.0"
+  }
+}

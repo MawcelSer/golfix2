@@ -1,0 +1,23 @@
+{
+  "name": "golfix",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "pnpm --filter @golfix/api dev",
+    "dev:dashboard": "pnpm --filter @golfix/dashboard dev",
+    "dev:golfer": "pnpm --filter @golfix/golfer-app dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @golfix/api db:generate",
+    "db:migrate": "pnpm --filter @golfix/api db:migrate",
+    "db:seed": "pnpm --filter @golfix/api db:seed",
+    "simulate": "pnpm --filter @golfix/simulator simulate"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.1"
+}
