@@ -67,9 +67,7 @@ describe("generateGeofence", () => {
     const ewkt = generateGeofence(TEE, GREEN);
 
     const match = ewkt.match(/POLYGON\(\((.+)\)\)/);
-    const coords = (match?.[1] ?? "").split(",").flatMap((s) =>
-      s.trim().split(" ").map(Number),
-    );
+    const coords = (match?.[1] ?? "").split(",").flatMap((s) => s.trim().split(" ").map(Number));
 
     for (const v of coords) {
       expect(isFinite(v)).toBe(true);

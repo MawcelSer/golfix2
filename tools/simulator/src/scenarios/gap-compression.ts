@@ -6,17 +6,14 @@ import type { ScenarioDefinition } from "../types";
  */
 export const gapCompression: ScenarioDefinition = {
   name: "gap-compression",
-  description:
-    "Groupe 3 (0.8x) rattrape Groupe 2 (1.25x) — alerte gap_compression au trou 5-6",
+  description: "Groupe 3 (0.8x) rattrape Groupe 2 (1.25x) — alerte gap_compression au trou 5-6",
   groups: [
     { groupIndex: 0, paceFactor: 1.0, holeNoise: 10, stuckHoles: [] },
     {
       groupIndex: 1,
       paceFactor: 1.25,
       holeNoise: 20,
-      stuckHoles: [
-        { hole: 4, extraMinutes: 3, reason: "Provisoire jouée" },
-      ],
+      stuckHoles: [{ hole: 4, extraMinutes: 3, reason: "Provisoire jouée" }],
     },
     { groupIndex: 2, paceFactor: 0.8, holeNoise: 8, stuckHoles: [] },
     { groupIndex: 3, paceFactor: 1.0, holeNoise: 15, stuckHoles: [] },

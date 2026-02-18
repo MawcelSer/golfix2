@@ -46,14 +46,25 @@ interface HoleData {
 
 function targetMinutesForPar(par: number): number {
   switch (par) {
-    case 3: return 10;
-    case 4: return 14;
-    case 5: return 17;
-    default: return 14;
+    case 3:
+      return 10;
+    case 4:
+      return 14;
+    case 5:
+      return 17;
+    default:
+      return 14;
   }
 }
 
-function computeHole(h: { num: number; par: number; dist: number; lat: number; lng: number; transition: number }): HoleData {
+function computeHole(h: {
+  num: number;
+  par: number;
+  dist: number;
+  lat: number;
+  lng: number;
+  transition: number;
+}): HoleData {
   const metersToLat = 1 / 111_320;
   return {
     ...h,
@@ -65,7 +76,10 @@ function computeHole(h: { num: number; par: number; dist: number; lat: number; l
 
 // ── Bezier path ─────────────────────────────────────────────────────
 
-interface BezierPoint { lat: number; lng: number; }
+interface BezierPoint {
+  lat: number;
+  lng: number;
+}
 
 function bezierPoint(p0: BezierPoint, p1: BezierPoint, p2: BezierPoint, t: number): BezierPoint {
   const mt = 1 - t;
@@ -144,7 +158,14 @@ export interface InternalSimOptions {
   speed: number;
   groupCount: number;
   seed?: number;
-  holesData: Array<{ num: number; par: number; dist: number; lat: number; lng: number; transition: number }>;
+  holesData: Array<{
+    num: number;
+    par: number;
+    dist: number;
+    lat: number;
+    lng: number;
+    transition: number;
+  }>;
 }
 
 /**
@@ -169,9 +190,10 @@ export async function runInternalSimulation(
     groupIndex: i,
     paceFactor: 0.9 + rng() * 0.3, // 0.9 - 1.2
     holeNoise: 10 + rng() * 10,
-    stuckHoles: rng() < 0.25
-      ? [{ hole: 1 + Math.floor(rng() * 18), extraMinutes: 2 + Math.floor(rng() * 5) }]
-      : [],
+    stuckHoles:
+      rng() < 0.25
+        ? [{ hole: 1 + Math.floor(rng() * 18), extraMinutes: 2 + Math.floor(rng() * 5) }]
+        : [],
   }));
 
   // Generate and flatten all events
@@ -197,10 +219,14 @@ export async function runInternalSimulation(
     if (waitMs > 0) {
       await new Promise<void>((resolve) => {
         const timer = setTimeout(resolve, waitMs);
-        signal?.addEventListener("abort", () => {
-          clearTimeout(timer);
-          resolve();
-        }, { once: true });
+        signal?.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(timer);
+            resolve();
+          },
+          { once: true },
+        );
       });
     }
 

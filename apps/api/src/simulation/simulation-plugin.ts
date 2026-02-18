@@ -14,15 +14,11 @@ import type { PositionEvent } from "./types";
 export async function simulationPlugin(app: FastifyInstance): Promise<void> {
   const speed = parseInt(process.env.DEV_SIM_SPEED ?? "30", 10);
   const groupCount = parseInt(process.env.DEV_SIM_GROUPS ?? "4", 10);
-  const seed = process.env.DEV_SIM_SEED
-    ? parseInt(process.env.DEV_SIM_SEED, 10)
-    : undefined;
+  const seed = process.env.DEV_SIM_SEED ? parseInt(process.env.DEV_SIM_SEED, 10) : undefined;
 
   const abortController = new AbortController();
 
-  app.log.info(
-    `Simulation activée — ${COURSE_NAME}, ${groupCount} groupes, ${speed}x`,
-  );
+  app.log.info(`Simulation activée — ${COURSE_NAME}, ${groupCount} groupes, ${speed}x`);
 
   // Expose simulation status via REST
   app.get("/api/v1/simulation/status", async () => {
@@ -70,13 +66,15 @@ export async function simulationPlugin(app: FastifyInstance): Promise<void> {
       },
       handlePosition,
       abortController.signal,
-    ).then(() => {
-      app.log.info("Simulation terminée");
-    }).catch((err) => {
-      if (!abortController.signal.aborted) {
-        app.log.error(err, "Erreur simulation");
-      }
-    });
+    )
+      .then(() => {
+        app.log.info("Simulation terminée");
+      })
+      .catch((err) => {
+        if (!abortController.signal.aborted) {
+          app.log.error(err, "Erreur simulation");
+        }
+      });
   });
 
   // Clean shutdown

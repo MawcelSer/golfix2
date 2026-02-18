@@ -28,11 +28,7 @@ async function verifySession(
     .select({ courseId: sessions.courseId })
     .from(sessions)
     .where(
-      and(
-        eq(sessions.id, sessionId),
-        eq(sessions.userId, userId),
-        eq(sessions.status, "active"),
-      ),
+      and(eq(sessions.id, sessionId), eq(sessions.userId, userId), eq(sessions.status, "active")),
     )
     .limit(1);
 

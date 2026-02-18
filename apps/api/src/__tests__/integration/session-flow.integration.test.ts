@@ -196,10 +196,7 @@ describe("Session flow integration tests", () => {
 
   it("finish session with 'abandoned' status → GET reflects abandoned", async () => {
     const app = await buildApp();
-    const token = await registerAndGetToken(
-      app,
-      "abandon-flow@test-session-flow.golfix.dev",
-    );
+    const token = await registerAndGetToken(app, "abandon-flow@test-session-flow.golfix.dev");
 
     const { sessionId } = await startSession(app, token, courseId);
 

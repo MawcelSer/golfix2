@@ -24,10 +24,7 @@ export interface GreenDistances {
  * @param lng  Longitude (WGS-84)
  * @returns    The matching course, or `null` if the point is off-course.
  */
-export async function isOnCourse(
-  lat: number,
-  lng: number,
-): Promise<CourseMatch | null> {
+export async function isOnCourse(lat: number, lng: number): Promise<CourseMatch | null> {
   const rows = await db.execute<{
     id: string;
     name: string;

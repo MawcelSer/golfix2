@@ -105,7 +105,10 @@ export function setupSocketServer(app: FastifyInstance): Server {
     // ── Disconnect ────────────────────────────────────────────
 
     socket.on("disconnect", (reason) => {
-      app.log.info({ socketId: socket.id, userId: socket.data.userId, reason }, "Socket disconnected");
+      app.log.info(
+        { socketId: socket.id, userId: socket.data.userId, reason },
+        "Socket disconnected",
+      );
     });
   });
 

@@ -50,10 +50,7 @@ beforeAll(async () => {
   validToken = generateAccessToken(testUserId);
 
   // Find the seed course (or any existing course)
-  const courseRows = await db
-    .select({ id: courses.id })
-    .from(courses)
-    .limit(1);
+  const courseRows = await db.select({ id: courses.id }).from(courses).limit(1);
 
   testCourseId = courseRows[0]!.id;
 
@@ -224,13 +221,9 @@ describe("requireRole", () => {
   it("returns 401 when verifyToken has not run (no userId)", async () => {
     // Build a separate app with only requireRole (no verifyToken)
     const bareApp = await buildApp();
-    bareApp.get(
-      "/test/no-auth/:courseId",
-      { preHandler: [requireRole("owner")] },
-      async () => {
-        return { ok: true };
-      },
-    );
+    bareApp.get("/test/no-auth/:courseId", { preHandler: [requireRole("owner")] }, async () => {
+      return { ok: true };
+    });
     await bareApp.ready();
 
     const response = await bareApp.inject({

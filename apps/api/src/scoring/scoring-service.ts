@@ -203,11 +203,7 @@ export async function getRoundDetail(
   userId: string,
 ): Promise<RoundWithScoresResponse> {
   // Fetch the round
-  const roundRows = await db
-    .select()
-    .from(rounds)
-    .where(eq(rounds.id, roundId))
-    .limit(1);
+  const roundRows = await db.select().from(rounds).where(eq(rounds.id, roundId)).limit(1);
 
   if (roundRows.length === 0) {
     throw new ScoringError("Round not found", 404);

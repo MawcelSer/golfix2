@@ -35,11 +35,7 @@ export async function batchInsertPositions(
     .select({ id: sessions.id, courseId: sessions.courseId })
     .from(sessions)
     .where(
-      and(
-        eq(sessions.id, sessionId),
-        eq(sessions.userId, userId),
-        eq(sessions.status, "active"),
-      ),
+      and(eq(sessions.id, sessionId), eq(sessions.userId, userId), eq(sessions.status, "active")),
     )
     .limit(1);
 

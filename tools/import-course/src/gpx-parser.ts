@@ -69,10 +69,7 @@ function classifyWaypoint(
   }
 }
 
-function validateTeesHaveGreens(
-  tees: Map<number, unknown>,
-  greens: Map<number, unknown>,
-): void {
+function validateTeesHaveGreens(tees: Map<number, unknown>, greens: Map<number, unknown>): void {
   for (const holeNumber of tees.keys()) {
     if (!greens.has(holeNumber)) {
       throw new Error(`Missing green for hole ${holeNumber}`);

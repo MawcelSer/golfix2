@@ -62,10 +62,7 @@ program
       try {
         await runLiveSimulation(result.data, options);
       } catch (err) {
-        console.error(
-          "Erreur simulation:",
-          err instanceof Error ? err.message : String(err),
-        );
+        console.error("Erreur simulation:", err instanceof Error ? err.message : String(err));
         process.exit(1);
       }
     }

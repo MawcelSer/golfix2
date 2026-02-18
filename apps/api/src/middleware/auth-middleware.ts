@@ -14,16 +14,11 @@ declare module "fastify" {
 
 // ── verifyToken ─────────────────────────────────────────────────────
 
-export async function verifyToken(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function verifyToken(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    reply
-      .status(401)
-      .send({ error: "Missing or invalid authorization header", statusCode: 401 });
+    reply.status(401).send({ error: "Missing or invalid authorization header", statusCode: 401 });
     return;
   }
 

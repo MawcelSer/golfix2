@@ -49,10 +49,7 @@ export interface CourseData {
  * @param lng  Longitude (WGS-84)
  * @returns    Course info or null if off-course
  */
-export async function locateCourse(
-  lat: number,
-  lng: number,
-): Promise<CourseMatch | null> {
+export async function locateCourse(lat: number, lng: number): Promise<CourseMatch | null> {
   return isOnCourse(lat, lng);
 }
 

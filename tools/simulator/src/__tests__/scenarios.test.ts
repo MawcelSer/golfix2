@@ -6,12 +6,7 @@ import { generateRandomScenario } from "../scenarios/random";
 
 describe("pre-built scenarios", () => {
   it("has 4 pre-built scenarios", () => {
-    expect(listScenarios()).toEqual([
-      "happy-path",
-      "slow-group",
-      "bottleneck",
-      "gap-compression",
-    ]);
+    expect(listScenarios()).toEqual(["happy-path", "slow-group", "bottleneck", "gap-compression"]);
   });
 
   it.each(["happy-path", "slow-group", "bottleneck", "gap-compression"])(
@@ -70,9 +65,7 @@ describe("random scenario", () => {
     const s1 = generateRandomScenario(4, 42);
     const s2 = generateRandomScenario(4, 42);
 
-    expect(s1.groups.map((g) => g.paceFactor)).toEqual(
-      s2.groups.map((g) => g.paceFactor),
-    );
+    expect(s1.groups.map((g) => g.paceFactor)).toEqual(s2.groups.map((g) => g.paceFactor));
   });
 
   it("varies with different seeds", () => {

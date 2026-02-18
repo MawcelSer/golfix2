@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { ZodError } from "zod";
+import type { ZodError } from "zod";
 import { createRoundSchema, upsertScoreSchema } from "./scoring-schemas";
 import {
   createRound,
@@ -13,9 +13,7 @@ import { verifyToken } from "../middleware/auth-middleware";
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function formatZodError(error: ZodError): string {
-  return error.errors
-    .map((e) => `${e.path.join(".")}: ${e.message}`)
-    .join(", ");
+  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
 }
 
 // ── Plugin ──────────────────────────────────────────────────────────
@@ -30,9 +28,7 @@ export async function scoringRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = createRoundSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
@@ -59,17 +55,11 @@ export async function scoringRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = upsertScoreSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
-        const result = await upsertScore(
-          request.params.id,
-          request.userId!,
-          parsed.data,
-        );
+        const result = await upsertScore(request.params.id, request.userId!, parsed.data);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ScoringError) {

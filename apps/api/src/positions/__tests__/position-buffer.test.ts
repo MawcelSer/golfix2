@@ -55,9 +55,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Clean up test data in reverse dependency order
-  await db.delete(positions).where(
-    sql`${positions.sessionId} IN (${sql.raw(`'${sessionId}', '${sessionId2}'`)})`,
-  );
+  await db
+    .delete(positions)
+    .where(sql`${positions.sessionId} IN (${sql.raw(`'${sessionId}', '${sessionId2}'`)})`);
   await db.delete(sessions).where(eq(sessions.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
 });

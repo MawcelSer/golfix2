@@ -3,7 +3,11 @@ import { resolve } from "node:path";
 import { Command } from "commander";
 import postgres, { type Sql } from "postgres";
 import { parseGpx } from "./gpx-parser.js";
-import { generateGeofence, computeCourseBoundary, haversineDistance } from "./geofence-generator.js";
+import {
+  generateGeofence,
+  computeCourseBoundary,
+  haversineDistance,
+} from "./geofence-generator.js";
 
 // ── CLI definition ────────────────────────────────────────────────────────────
 
@@ -159,9 +163,7 @@ async function run(opts: {
   });
 
   // ── Course-level data ──────────────────────────────────────────────────────
-  const totalPar = opts.par
-    ? parseInt(opts.par, 10)
-    : holeRows.reduce((sum, h) => sum + h.par, 0);
+  const totalPar = opts.par ? parseInt(opts.par, 10) : holeRows.reduce((sum, h) => sum + h.par, 0);
 
   const paceTargetMinutes = parseInt(opts.paceTarget, 10);
 

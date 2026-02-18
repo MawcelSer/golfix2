@@ -1,11 +1,6 @@
 import type { FastifyInstance } from "fastify";
-import { ZodError } from "zod";
-import {
-  registerSchema,
-  loginSchema,
-  anonymousSchema,
-  refreshSchema,
-} from "./auth-schemas";
+import type { ZodError } from "zod";
+import { registerSchema, loginSchema, anonymousSchema, refreshSchema } from "./auth-schemas";
 import {
   registerUser,
   loginUser,
@@ -18,16 +13,12 @@ import {
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function formatZodError(error: ZodError): string {
-  return error.errors
-    .map((e) => `${e.path.join(".")}: ${e.message}`)
-    .join(", ");
+  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
 }
 
 function isDuplicateEmail(error: unknown): boolean {
   return (
-    error instanceof Error &&
-    error.message.includes("unique") &&
-    error.message.includes("email")
+    error instanceof Error && error.message.includes("unique") && error.message.includes("email")
   );
 }
 
@@ -41,9 +32,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = registerSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
@@ -51,9 +40,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(201).send(result);
       } catch (error) {
         if (isDuplicateEmail(error)) {
-          return reply
-            .status(409)
-            .send({ error: "Email already registered", statusCode: 409 });
+          return reply.status(409).send({ error: "Email already registered", statusCode: 409 });
         }
         throw error;
       }
@@ -67,22 +54,15 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = loginSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
         const result = await loginUser(parsed.data);
         return reply.status(200).send(result);
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === "Invalid credentials"
-        ) {
-          return reply
-            .status(401)
-            .send({ error: "Invalid credentials", statusCode: 401 });
+        if (error instanceof Error && error.message === "Invalid credentials") {
+          return reply.status(401).send({ error: "Invalid credentials", statusCode: 401 });
         }
         throw error;
       }
@@ -96,9 +76,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = anonymousSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       const result = await registerAnonymous(parsed.data);
@@ -113,9 +91,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = refreshSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
@@ -123,9 +99,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(200).send(tokens);
       } catch (error) {
         if (error instanceof AuthError) {
-          return reply
-            .status(401)
-            .send({ error: error.message, statusCode: 401 });
+          return reply.status(401).send({ error: error.message, statusCode: 401 });
         }
         throw error;
       }
@@ -139,9 +113,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = refreshSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       await revokeRefreshToken(parsed.data.refreshToken);

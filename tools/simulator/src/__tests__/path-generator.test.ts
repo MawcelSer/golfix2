@@ -66,8 +66,13 @@ describe("gaussianNoise", () => {
 describe("computeHole", () => {
   it("computes green position from tee and distance", () => {
     const hole = computeHole({
-      num: 1, par: 4, si: 7, dist: 365,
-      lat: 44.8392, lng: -0.581, transition: 1,
+      num: 1,
+      par: 4,
+      si: 7,
+      dist: 365,
+      lat: 44.8392,
+      lng: -0.581,
+      transition: 1,
     });
 
     expect(hole.greenLat).toBeGreaterThan(hole.lat);
@@ -78,8 +83,13 @@ describe("computeHole", () => {
 
 describe("generateHoleWaypoints", () => {
   const hole = computeHole({
-    num: 1, par: 4, si: 7, dist: 365,
-    lat: 44.8392, lng: -0.581, transition: 1,
+    num: 1,
+    par: 4,
+    si: 7,
+    dist: 365,
+    lat: 44.8392,
+    lng: -0.581,
+    transition: 1,
   });
 
   it("generates correct number of waypoints", () => {
@@ -94,9 +104,7 @@ describe("generateHoleWaypoints", () => {
 
   it("starts near the tee position", () => {
     const rng = createRng(42);
-    const waypoints = generateHoleWaypoints(
-      hole, 14 * 60_000, new Date(), 5000, rng,
-    );
+    const waypoints = generateHoleWaypoints(hole, 14 * 60_000, new Date(), 5000, rng);
     const first = waypoints[0]!;
 
     const distFromTee = haversineDistance(first.lat, first.lng, hole.lat, hole.lng);
@@ -105,14 +113,10 @@ describe("generateHoleWaypoints", () => {
 
   it("ends near the green position", () => {
     const rng = createRng(42);
-    const waypoints = generateHoleWaypoints(
-      hole, 14 * 60_000, new Date(), 5000, rng,
-    );
+    const waypoints = generateHoleWaypoints(hole, 14 * 60_000, new Date(), 5000, rng);
     const last = waypoints[waypoints.length - 1]!;
 
-    const distFromGreen = haversineDistance(
-      last.lat, last.lng, hole.greenLat, hole.greenLng,
-    );
+    const distFromGreen = haversineDistance(last.lat, last.lng, hole.greenLat, hole.greenLng);
     expect(distFromGreen).toBeLessThan(50); // within 50m (GPS noise)
   });
 
@@ -134,9 +138,7 @@ describe("generateHoleWaypoints", () => {
 
   it("has accuracy values between 5 and 15", () => {
     const rng = createRng(42);
-    const waypoints = generateHoleWaypoints(
-      hole, 14 * 60_000, new Date(), 5000, rng,
-    );
+    const waypoints = generateHoleWaypoints(hole, 14 * 60_000, new Date(), 5000, rng);
 
     for (const wp of waypoints) {
       expect(wp.accuracy).toBeGreaterThanOrEqual(5);

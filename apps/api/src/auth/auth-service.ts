@@ -32,10 +32,7 @@ export async function hashPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, BCRYPT_ROUNDS);
 }
 
-export async function verifyPassword(
-  plain: string,
-  hash: string,
-): Promise<boolean> {
+export async function verifyPassword(plain: string, hash: string): Promise<boolean> {
   return bcrypt.compare(plain, hash);
 }
 
@@ -59,10 +56,7 @@ export function verifyAccessToken(token: string): { sub: string } {
   return { sub: payload.sub as string };
 }
 
-export async function storeRefreshToken(
-  userId: string,
-  rawToken: string,
-): Promise<void> {
+export async function storeRefreshToken(userId: string, rawToken: string): Promise<void> {
   const tokenHash = hashToken(rawToken);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
 
@@ -73,9 +67,7 @@ export async function storeRefreshToken(
   });
 }
 
-export async function generateTokenPair(
-  userId: string,
-): Promise<AuthTokens> {
+export async function generateTokenPair(userId: string): Promise<AuthTokens> {
   const accessToken = generateAccessToken(userId);
   const rawRefreshToken = crypto.randomUUID();
 
@@ -193,9 +185,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
   };
 }
 
-export async function registerAnonymous(
-  input: AnonymousInput,
-): Promise<AuthResponse> {
+export async function registerAnonymous(input: AnonymousInput): Promise<AuthResponse> {
   const inserted = await db
     .insert(users)
     .values({

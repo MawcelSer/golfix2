@@ -85,10 +85,7 @@ export async function startSession(
       activeCount: count(sessions.id),
     })
     .from(groups)
-    .leftJoin(
-      sessions,
-      and(eq(sessions.groupId, groups.id), eq(sessions.status, "active")),
-    )
+    .leftJoin(sessions, and(eq(sessions.groupId, groups.id), eq(sessions.status, "active")))
     .where(and(eq(groups.courseId, courseId), eq(groups.date, today)))
     .groupBy(groups.id, groups.teeTimeId)
     .having(sql`count(${sessions.id}) < ${MAX_GROUP_SIZE}`)
@@ -145,11 +142,7 @@ export async function finishSession(
   userId: string,
   status: "finished" | "abandoned",
 ): Promise<SessionResponse> {
-  const rows = await db
-    .select()
-    .from(sessions)
-    .where(eq(sessions.id, sessionId))
-    .limit(1);
+  const rows = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
 
   const session = rows[0];
 
@@ -176,15 +169,8 @@ export async function finishSession(
 
 // ── getSession ──────────────────────────────────────────────────────
 
-export async function getSession(
-  sessionId: string,
-  userId: string,
-): Promise<SessionResponse> {
-  const rows = await db
-    .select()
-    .from(sessions)
-    .where(eq(sessions.id, sessionId))
-    .limit(1);
+export async function getSession(sessionId: string, userId: string): Promise<SessionResponse> {
+  const rows = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1);
 
   const session = rows[0];
 
@@ -197,12 +183,7 @@ export async function getSession(
     const roleRows = await db
       .select({ role: courseRoles.role })
       .from(courseRoles)
-      .where(
-        and(
-          eq(courseRoles.userId, userId),
-          eq(courseRoles.courseId, session.courseId),
-        ),
-      )
+      .where(and(eq(courseRoles.userId, userId), eq(courseRoles.courseId, session.courseId)))
       .limit(1);
 
     const role = roleRows[0]?.role;

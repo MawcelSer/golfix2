@@ -114,10 +114,7 @@ describe("Position batch routes", () => {
     await cleanTestData();
 
     // Get a course from the seeded data
-    const courseRows = await db
-      .select({ id: courses.id })
-      .from(courses)
-      .limit(1);
+    const courseRows = await db.select({ id: courses.id }).from(courses).limit(1);
 
     courseId = courseRows[0]!.id;
   });
@@ -274,7 +271,12 @@ describe("Position batch routes", () => {
       const positions = [
         { lat: 45.5, lng: -73.6, accuracy: 5, recordedAt: ts },
         { lat: 45.501, lng: -73.601, accuracy: 5, recordedAt: ts }, // duplicate timestamp
-        { lat: 45.502, lng: -73.602, accuracy: 5, recordedAt: new Date(Date.now() + 1000).toISOString() },
+        {
+          lat: 45.502,
+          lng: -73.602,
+          accuracy: 5,
+          recordedAt: new Date(Date.now() + 1000).toISOString(),
+        },
       ];
 
       const response = await app.inject({

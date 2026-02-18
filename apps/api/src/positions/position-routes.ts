@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { ZodError } from "zod";
+import type { ZodError } from "zod";
 import { positionBatchSchema } from "./position-schemas";
 import { batchInsertPositions, PositionError } from "./position-service";
 import { verifyToken } from "../middleware/auth-middleware";
@@ -7,9 +7,7 @@ import { verifyToken } from "../middleware/auth-middleware";
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function formatZodError(error: ZodError): string {
-  return error.errors
-    .map((e) => `${e.path.join(".")}: ${e.message}`)
-    .join(", ");
+  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
 }
 
 // ── Plugin ──────────────────────────────────────────────────────────
@@ -24,9 +22,7 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const parsed = positionBatchSchema.safeParse(request.body);
       if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ error: formatZodError(parsed.error), statusCode: 400 });
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {

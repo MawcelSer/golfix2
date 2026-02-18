@@ -97,11 +97,7 @@ describe("distanceToGreen", () => {
   });
 
   it("returns null for a non-existent hole ID", async () => {
-    const result = await distanceToGreen(
-      "00000000-0000-0000-0000-000000000000",
-      44.8392,
-      -0.581,
-    );
+    const result = await distanceToGreen("00000000-0000-0000-0000-000000000000", 44.8392, -0.581);
 
     expect(result).toBeNull();
   });

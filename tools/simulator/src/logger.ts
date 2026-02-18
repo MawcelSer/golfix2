@@ -45,23 +45,17 @@ export class SimLogger {
 
   /** Group movement event */
   groupMove(groupIndex: number, hole: number, par: number): void {
-    this.info(
-      `Groupe ${groupIndex + 1} → Trou ${hole} (par ${par})`,
-    );
+    this.info(`Groupe ${groupIndex + 1} → Trou ${hole} (par ${par})`);
   }
 
   /** Group finished */
   groupFinished(groupIndex: number, simElapsed: string): void {
-    this.success(
-      `Groupe ${groupIndex + 1} — terminé (${simElapsed})`,
-    );
+    this.success(`Groupe ${groupIndex + 1} — terminé (${simElapsed})`);
   }
 
   /** Group dropped out */
   groupDroppedOut(groupIndex: number, hole: number): void {
-    this.warn(
-      `Groupe ${groupIndex + 1} — abandon au trou ${hole}`,
-    );
+    this.warn(`Groupe ${groupIndex + 1} — abandon au trou ${hole}`);
   }
 
   /** Simulation header */
@@ -81,9 +75,7 @@ export class SimLogger {
   /** Position emitted (verbose only) */
   position(groupIndex: number, hole: number, lat: number, lng: number): void {
     if (this.verbose) {
-      this.debug(
-        `  G${groupIndex + 1} H${hole}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-      );
+      this.debug(`  G${groupIndex + 1} H${hole}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
     }
   }
 }

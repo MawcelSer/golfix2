@@ -26,11 +26,7 @@ function connectClient(token: string): ClientSocket {
   });
 }
 
-function waitForEvent<T>(
-  socket: ClientSocket,
-  event: string,
-  timeoutMs = 3000,
-): Promise<T> {
+function waitForEvent<T>(socket: ClientSocket, event: string, timeoutMs = 3000): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       reject(new Error(`Timed out waiting for event: ${event}`));

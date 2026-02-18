@@ -25,7 +25,11 @@ const VALID_GPX = buildGpx(
 );
 
 const MISSING_GREEN_GPX = buildGpx(
-  [wpt(48.8566, 2.3522, "Tee_01"), wpt(48.86, 2.356, "Tee_02"), wpt(48.862, 2.358, "Green_02")].join("\n"),
+  [
+    wpt(48.8566, 2.3522, "Tee_01"),
+    wpt(48.86, 2.356, "Tee_02"),
+    wpt(48.862, 2.358, "Green_02"),
+  ].join("\n"),
 );
 
 const HAZARD_ONLY_GPX = buildGpx(
@@ -60,9 +64,7 @@ describe("parseGpx", () => {
   });
 
   it("rejects GPX when a tee has no matching green", () => {
-    expect(() => parseGpx(MISSING_GREEN_GPX)).toThrow(
-      /missing green/i,
-    );
+    expect(() => parseGpx(MISSING_GREEN_GPX)).toThrow(/missing green/i);
   });
 
   it("parses hazards correctly", () => {

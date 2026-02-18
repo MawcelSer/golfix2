@@ -87,10 +87,7 @@ describe("Scoring routes", () => {
     await cleanTestData();
 
     // Get a course from the seeded data
-    const courseRows = await db
-      .select({ id: courses.id })
-      .from(courses)
-      .limit(1);
+    const courseRows = await db.select({ id: courses.id }).from(courses).limit(1);
 
     courseId = courseRows[0]!.id;
   });
