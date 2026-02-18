@@ -47,9 +47,19 @@ export async function batchInsertPositions(
     throw new PositionError("Session not found or not active", 404);
   }
 
+  // Deduplicate by recordedAt within the batch (session_id is constant)
+  const seen = new Set<string>();
+  const unique = positionsData.filter((p) => {
+    if (seen.has(p.recordedAt)) return false;
+    seen.add(p.recordedAt);
+    return true;
+  });
+
+  if (unique.length === 0) return 0;
+
   // Bulk insert positions
   await db.insert(positions).values(
-    positionsData.map((p) => ({
+    unique.map((p) => ({
       sessionId,
       location: { x: p.lng, y: p.lat },
       accuracy: p.accuracy,
@@ -57,5 +67,5 @@ export async function batchInsertPositions(
     })),
   );
 
-  return positionsData.length;
+  return unique.length;
 }

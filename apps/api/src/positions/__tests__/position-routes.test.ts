@@ -265,6 +265,33 @@ describe("Position batch routes", () => {
       await app.close();
     });
 
+    it("deduplicates positions by recordedAt within the batch", async () => {
+      const app = await buildApp();
+      const token = await registerAndGetToken(app, "pos-dedup@test-pos.golfix.dev");
+      const sessionId = await startSession(app, token, courseId);
+
+      const ts = new Date().toISOString();
+      const positions = [
+        { lat: 45.5, lng: -73.6, accuracy: 5, recordedAt: ts },
+        { lat: 45.501, lng: -73.601, accuracy: 5, recordedAt: ts }, // duplicate timestamp
+        { lat: 45.502, lng: -73.602, accuracy: 5, recordedAt: new Date(Date.now() + 1000).toISOString() },
+      ];
+
+      const response = await app.inject({
+        method: "POST",
+        url: `${BASE}/batch`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: { sessionId, positions },
+      });
+
+      expect(response.statusCode).toBe(201);
+
+      const body = response.json();
+      expect(body.inserted).toBe(2); // 3 sent, 2 unique by recordedAt
+
+      await app.close();
+    });
+
     it("returns 400 for invalid position data", async () => {
       const app = await buildApp();
       const token = await registerAndGetToken(app, "pos-invalid@test-pos.golfix.dev");
