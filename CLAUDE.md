@@ -61,8 +61,8 @@ Pace engine design: **`docs/plans/pace-engine-design.md`** (806 lines)
 **Always update `PLAN.md` after completing a task** (update "Current sprint" and "Last completed task" at the top).
 **Write sprint documentation** (what's implemented, how to test) in `docs/plans/` after completing a sprint.
 
-**Current sprint:** Sprint 3 — Pace Engine & Dashboard
-**Last completed task:** 2.13 Update PLAN.md + CLAUDE.md (Sprint 2 complete)
+**Current sprint:** Sprint 3 — Golfer PWA
+**Last completed task:** 4.7 Integration tests (Sprint 4 complete)
 
 > Update "Current sprint" and "Last completed task" here AND in PLAN.md after each task is done.
 

@@ -2,8 +2,8 @@
 
 > Real-time golf course management platform: GPS distances, pace tracking, course manager dashboard.
 
-**Current sprint:** Sprint 3 — Pace Engine & Dashboard
-**Last completed task:** 2.13 Update PLAN.md + CLAUDE.md (Sprint 2 complete)
+**Current sprint:** Sprint 3 — Golfer PWA
+**Last completed task:** 4.7 Integration tests (Sprint 4 complete)
 
 ---
 
