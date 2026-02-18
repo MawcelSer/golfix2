@@ -17,9 +17,9 @@ function formatZodError(error: ZodError): string {
 }
 
 function isDuplicateEmail(error: unknown): boolean {
-  return (
-    error instanceof Error && error.message.includes("unique") && error.message.includes("email")
-  );
+  if (!(error instanceof Error)) return false;
+  const msg = error.message;
+  return msg.includes("users_email_unique") || (msg.includes("unique") && msg.includes("email"));
 }
 
 // ── Plugin ──────────────────────────────────────────────────────────

@@ -76,6 +76,7 @@ CREATE TABLE "users" (
 	"gdpr_consent_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
 	CONSTRAINT "users_identity_check" CHECK ("users"."email" IS NOT NULL OR "users"."device_id" IS NOT NULL)
 );
 --> statement-breakpoint
