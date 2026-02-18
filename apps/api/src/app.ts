@@ -55,6 +55,9 @@ export async function buildApp() {
 
       const { courseRoutes } = await import("./courses/course-routes");
       await api.register(courseRoutes, { prefix: "/courses" });
+
+      const { sessionRoutes } = await import("./sessions/session-routes");
+      await api.register(sessionRoutes, { prefix: "/sessions" });
     },
     { prefix: "/api/v1" },
   );
