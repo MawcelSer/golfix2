@@ -52,6 +52,9 @@ export async function buildApp() {
 
       const { authRoutes } = await import("./auth/auth-routes");
       await api.register(authRoutes, { prefix: "/auth" });
+
+      const { courseRoutes } = await import("./courses/course-routes");
+      await api.register(courseRoutes, { prefix: "/courses" });
     },
     { prefix: "/api/v1" },
   );
