@@ -1,31 +1,33 @@
 # Project Instructions
 
-> This file is read by Claude at the start of every session. Fill in the sections below for your project.
-
 ## Project Overview
 
-<!-- Replace with your project description -->
-
-**Name**: [Golfix]
-**Description**: [Solutions to optimize golf course management and user experience]]
+**Name**: Golfix
+**Description**: Real-time golf course management platform — GPS distances, pace tracking, course manager dashboard.
 
 ## Architecture
 
-<!-- Replace with your project's architecture overview -->
-
+```
+Golfer PWA (React+Vite) ──── WebSocket/REST ────┐
+                                                 │
+Dashboard  (React+Vite) ──── WebSocket/REST ──── Fastify API (Node+TS)
+                                                 │  Socket.io, Pace Engine,
+                                                 │  PositionBuffer
+                                                 │
+                                                 └── PostgreSQL 16 + PostGIS 3.4
 ```
 
-```
+**Monorepo**: pnpm workspace — `apps/` (api, dashboard, golfer-app) + `packages/` (shared, ui, eslint-config) + `tools/` (import-course)
 
 ## Critical Rules
 
 1. **Small, focused files**: 200-400 lines typical, 800 max
 2. **Feature-based organization**: Group by feature/domain, not file type
 3. **Immutable data patterns**: Always create new objects, never mutate
-4. **No hardcoded secrets**: Use environment variables (see `.claude/rules/security.md`)
-5. **Input validation**: Validate all external input with schema libraries (Zod, etc.)
-6. **Test-first development**: Write tests before implementation (see `.claude/rules/testing.md`)
-7. **Git workflow**: Always make a feature branch before coding (see `.claude/rules/git-workflow.md`)
+4. **No hardcoded secrets**: Use environment variables
+5. **Input validation**: Validate all external input with Zod
+6. **Test-first development**: Write tests before implementation
+7. **Git workflow**: Always make a feature branch before coding
 
 ## Code Standards
 
@@ -35,31 +37,38 @@
 - **Functions**: Under 50 lines, single responsibility
 - **Nesting**: Maximum 4 levels deep
 
-## Security Requirements
+## Security
 
 - Environment variables for all secrets
 - Parameterized database queries (never string concatenation)
 - CSRF protection on state-changing endpoints
-- Input validation using Zod or equivalent
-- See `.claude/rules/security.md` for full checklist
-
-## Model Selection
-- **Sonnet**: Main development
-- **Opus**: Complex architecture, deep reasoning, multi-agent orchestration
+- Input validation using Zod
+- Rate limiting on auth endpoints (`@fastify/rate-limit`)
 
 ## Implementation Plan
 
-Full plan : **`PLAN.md`**
+Full plan: **`PLAN.md`** (636 lines)
+Pace engine design: **`docs/plans/pace-engine-design.md`** (806 lines)
 
-**Always read `PLAN.md` before starting work on any sprint task.** Follow task numbering strictly — do not skip ahead or reorder.
-**Always update `PLAN.md` and make a sprint docuemntaiton (what's implemented, how to test for a human) in plans folder after completing a sprint**
+### When to read PLAN.md
 
+- **Starting a sprint task**: Read only the current sprint section (use line offset)
+- **Schema questions**: Read the Database Schema section (~lines 120-325)
+- **Technical details**: Read Key Technical Notes section (~lines 540-636)
+- **Do NOT read the full file** every time — use MEMORY.md for orientation
 
+**Always update `PLAN.md` after completing a task** (update "Current sprint" and "Last completed task" at the top).
+**Write sprint documentation** (what's implemented, how to test) in `docs/plans/` after completing a sprint.
 
 **Current sprint:** Sprint 1 — Foundation & Infra
 **Last completed task:** (none)
 
-> Update "Current sprint" and "Last completed task" after each task is done.
+> Update "Current sprint" and "Last completed task" here AND in PLAN.md after each task is done.
+
+## Model Selection
+
+- **Sonnet**: Main development
+- **Opus**: Complex architecture, deep reasoning, multi-agent orchestration
 
 ## Tips
 
