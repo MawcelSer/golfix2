@@ -2,8 +2,8 @@
 
 > Real-time golf course management platform: GPS distances, pace tracking, course manager dashboard.
 
-**Current sprint:** Sprint 1 — Foundation & Infra
-**Last completed task:** (none)
+**Current sprint:** Sprint 2 — API, Auth & Real-time
+**Last completed task:** 1b.2 API dev mode simulation plugin (Sprint 1b complete)
 
 ---
 
@@ -374,6 +374,21 @@ CREATE INDEX idx_refresh_tokens_hash ON refresh_tokens(token_hash);
 | 1.9 | CI pipeline | GitHub Actions workflow: lint + typecheck + test on every PR. Fail-fast |
 
 **Deliverable:** Monorepo builds, database runs with full schema, Fastify starts with security basics, CI green.
+
+---
+
+### Sprint 1b — Simulation Tooling
+
+**Goal:** Build a golf course simulator that generates realistic GPS traces for testing the full pipeline (position ingestion → pace engine → dashboard). Two modes: CLI tool for E2E testing, API dev mode for quick dashboard prototyping.
+
+> **Design doc:** `docs/plans/simulator-design.md` — covers scenarios, time acceleration, GPS path generation, file structure.
+
+| # | Task | Description |
+|---|------|-------------|
+| 1b.1 | CLI simulator tool | `tools/simulator/`: Commander.js CLI with dry-run and live modes. SimClock for time acceleration, Bezier GPS path generator, 4 pre-built scenarios (happy-path, slow-group, bottleneck, gap-compression) + random procedural generator. Socket.io + REST clients for live mode. 37 unit tests. |
+| 1b.2 | API dev mode plugin | `apps/api/src/simulation/`: Fastify plugin registered when `DEV_SIMULATE=true`. Internal engine feeds positions directly to PositionBuffer (bypasses auth/Socket.io). REST endpoints for status/stop. |
+
+**Deliverable:** `pnpm simulate -- --scenario happy-path --speed 30 --dry-run` works. API dev mode starts with `DEV_SIMULATE=true pnpm dev:api`. PositionBuffer integration pending Sprint 2.9.
 
 ---
 
