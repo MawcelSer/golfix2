@@ -5,9 +5,7 @@ import type { CourseData } from "@golfix/shared";
 // Mock idb-keyval before importing anything that uses it
 const mockCache = new Map<string, CourseData>();
 vi.mock("@/services/course-cache", () => ({
-  getCachedCourse: vi.fn((slug: string) =>
-    Promise.resolve(mockCache.get(slug) ?? null),
-  ),
+  getCachedCourse: vi.fn((slug: string) => Promise.resolve(mockCache.get(slug) ?? null)),
   setCachedCourse: vi.fn((course: CourseData) => {
     mockCache.set(course.slug, course);
     return Promise.resolve();

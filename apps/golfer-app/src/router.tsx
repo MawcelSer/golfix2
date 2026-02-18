@@ -5,10 +5,7 @@ import { LoginScreen } from "@/features/auth/LoginScreen";
 import { RegisterScreen } from "@/features/auth/RegisterScreen";
 import { AnonymousScreen } from "@/features/auth/AnonymousScreen";
 import { LandingPage } from "@/features/session/LandingPage";
-
-function GpsPlaceholder() {
-  return <div>GPS Screen</div>;
-}
+import { GpsScreen } from "@/features/gps/GpsScreen";
 
 function ScorecardPlaceholder() {
   return <div>Scorecard Screen</div>;
@@ -40,7 +37,7 @@ export const router = createBrowserRouter([
         path: "/gps",
         element: (
           <AppShell>
-            <GpsPlaceholder />
+            <GpsScreen />
           </AppShell>
         ),
       },

@@ -39,10 +39,7 @@ export async function clearCachedCourse(slug: string): Promise<void> {
   await del(cacheKey(slug));
 }
 
-export async function isCacheValid(
-  slug: string,
-  currentVersion: number,
-): Promise<boolean> {
+export async function isCacheValid(slug: string, currentVersion: number): Promise<boolean> {
   const entry = await get<CachedCourse>(cacheKey(slug));
   if (!entry) return false;
 
