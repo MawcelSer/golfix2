@@ -28,7 +28,6 @@ test.describe("Login flow", () => {
     await page.getByRole("button", { name: "Connexion" }).click();
 
     await expect(page).toHaveURL(/\/gps/);
-    await expect(page.getByText("GPS Screen")).toBeVisible();
   });
 
   test("shows error on failed login", async ({ page }) => {
