@@ -104,6 +104,14 @@ export async function mockApi(page: Page) {
     }),
   );
 
+  await page.route("**/api/v1/users/me/preferences", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ notificationPrefs: { pace_reminders: true } }),
+    }),
+  );
+
   await page.route("**/api/v1/courses/locate", (route) =>
     route.fulfill({
       status: 200,
