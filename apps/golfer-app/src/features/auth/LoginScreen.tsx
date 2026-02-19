@@ -30,8 +30,8 @@ export function LoginScreen() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-pine px-6">
-      <img src="/logo.png" alt="Golfix" className="mb-8 h-10" />
-      <h1 className="mb-6 text-2xl font-semibold text-cream">Connexion</h1>
+      <img src="/icons/app-logo.png" alt="Golfix" className="mb-8 h-16" />
+      <h1 className="mb-6 font-display text-2xl text-cream">Connexion</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-sm font-medium text-cream">
@@ -43,7 +43,7 @@ export function LoginScreen() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-lg bg-cream/10 px-4 py-3 text-cream placeholder:text-cream/40"
+            className="w-full rounded-xl border border-cream/10 bg-cream/8 px-4 py-3 text-cream placeholder:text-cream/40"
             placeholder="votre@email.com"
           />
         </div>
@@ -57,14 +57,14 @@ export function LoginScreen() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-lg bg-cream/10 px-4 py-3 text-cream placeholder:text-cream/40"
+            className="w-full rounded-xl border border-cream/10 bg-cream/8 px-4 py-3 text-cream placeholder:text-cream/40"
           />
         </div>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-green-mid py-3 font-medium text-cream disabled:opacity-50"
+          className="w-full rounded-xl bg-green-mid py-3 font-medium text-cream disabled:opacity-50"
         >
           {loading ? "Chargement..." : "Connexion"}
         </button>
