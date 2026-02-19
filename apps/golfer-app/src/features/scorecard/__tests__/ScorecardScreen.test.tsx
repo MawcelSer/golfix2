@@ -28,31 +28,39 @@ let mockCurrentHole = 1;
 let mockError: string | null = null;
 let mockSaving = false;
 
-vi.mock("@/stores/round-store", () => ({
-  useRoundStore: vi.fn((selectorOrUndefined?: (s: Record<string, unknown>) => unknown) => {
-    const state = {
-      currentHole: mockCurrentHole,
-      scores: mockScores,
-      error: mockError,
-      saving: mockSaving,
-      startRound: mockStartRound,
-      setCurrentHole: mockSetCurrentHole,
-      saveScore: mockSaveScore,
-      reset: mockReset,
-    };
-    if (typeof selectorOrUndefined === "function") {
-      return selectorOrUndefined(state);
-    }
-    return state;
-  }),
-}));
+const roundStoreState = () => ({
+  currentHole: mockCurrentHole,
+  scores: mockScores,
+  error: mockError,
+  saving: mockSaving,
+  startRound: mockStartRound,
+  setCurrentHole: mockSetCurrentHole,
+  saveScore: mockSaveScore,
+  reset: mockReset,
+});
+
+vi.mock("@/stores/round-store", () => {
+  const useRoundStore = Object.assign(
+    vi.fn((selectorOrUndefined?: (s: Record<string, unknown>) => unknown) => {
+      const state = roundStoreState();
+      if (typeof selectorOrUndefined === "function") {
+        return selectorOrUndefined(state);
+      }
+      return state;
+    }),
+    { getState: () => roundStoreState() },
+  );
+  return { useRoundStore };
+});
 
 // ── Mock session store ────────────────────────────────────────────────
 let mockSessionStatus = "idle";
+let mockSessionError: string | null = null;
 const mockFinishSession = vi.fn().mockResolvedValue(undefined);
 
 const sessionStoreState = () => ({
   status: mockSessionStatus,
+  error: mockSessionError,
   finishSession: mockFinishSession,
 });
 
@@ -117,6 +125,7 @@ describe("ScorecardScreen", () => {
     mockError = null;
     mockSaving = false;
     mockSessionStatus = "idle";
+    mockSessionError = null;
   });
 
   afterEach(cleanup);
@@ -325,9 +334,9 @@ describe("ScorecardScreen", () => {
       synced: false,
     });
 
-    // finishSession resolves but does NOT change status (simulates internal error handling)
+    // finishSession resolves but sets error (simulates internal error handling)
     mockFinishSession.mockImplementationOnce(async () => {
-      // Status stays "active" — store caught the error internally
+      mockSessionError = "Impossible de terminer la session";
     });
     vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 

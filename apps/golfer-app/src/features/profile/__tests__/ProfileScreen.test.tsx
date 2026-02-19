@@ -69,20 +69,59 @@ describe("ProfileScreen", () => {
     });
   });
 
-  it("toggles pace reminders on click", async () => {
+  it("toggles pace reminders on click and updates UI optimistically", async () => {
     renderProfile();
 
+    // Wait for preferences to load
     await waitFor(() => {
-      expect(screen.getByRole("switch")).toBeInTheDocument();
+      expect(screen.getByRole("switch")).not.toBeDisabled();
     });
 
+    // Verify initial state
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+
     fireEvent.click(screen.getByRole("switch"));
+
+    // Optimistic UI update: aria-checked flips immediately
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
 
     await waitFor(() => {
       expect(mockPatch).toHaveBeenCalledWith("/users/me/preferences", {
         paceReminders: false,
       });
     });
+  });
+
+  it("reverts toggle on PATCH failure", async () => {
+    mockPatch.mockRejectedValue(new Error("Network error"));
+
+    renderProfile();
+
+    // Wait for preferences to load
+    await waitFor(() => {
+      expect(screen.getByRole("switch")).not.toBeDisabled();
+    });
+
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(screen.getByRole("switch"));
+
+    // Optimistic: flips to false
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
+
+    // After rejection: reverts to true
+    await waitFor(() => {
+      expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+    });
+  });
+
+  it("disables toggle while loading preferences", () => {
+    // Don't resolve the get call
+    mockGet.mockReturnValue(new Promise(() => {}));
+
+    renderProfile();
+
+    expect(screen.getByRole("switch")).toBeDisabled();
   });
 
   it("calls logout and navigates on logout click", () => {

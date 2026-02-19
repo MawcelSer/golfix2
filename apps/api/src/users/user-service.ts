@@ -1,13 +1,16 @@
 import { db } from "../db/connection";
 import { users } from "../db/schema/core";
-import { eq } from "drizzle-orm";
-import type { UserPrefsResponse } from "@golfix/shared";
+import { eq, sql } from "drizzle-orm";
+import type { NotificationPrefs, UserPrefsResponse } from "@golfix/shared";
 
-interface NotificationPrefsRow {
-  pace_reminders: boolean;
+const DEFAULT_PREFS: NotificationPrefs = { pace_reminders: true };
+
+export class UserNotFoundError extends Error {
+  constructor(userId: string) {
+    super(`User ${userId} not found`);
+    this.name = "UserNotFoundError";
+  }
 }
-
-const DEFAULT_PREFS: NotificationPrefsRow = { pace_reminders: true };
 
 export async function getUserPreferences(userId: string): Promise<UserPrefsResponse> {
   const [user] = await db
@@ -15,7 +18,9 @@ export async function getUserPreferences(userId: string): Promise<UserPrefsRespo
     .from(users)
     .where(eq(users.id, userId));
 
-  const prefs = (user?.notificationPrefs as NotificationPrefsRow | null) ?? DEFAULT_PREFS;
+  if (!user) throw new UserNotFoundError(userId);
+
+  const prefs = (user.notificationPrefs as NotificationPrefs | null) ?? DEFAULT_PREFS;
 
   return { notificationPrefs: prefs };
 }
@@ -24,14 +29,24 @@ export async function updateUserPreferences(
   userId: string,
   update: { paceReminders?: boolean },
 ): Promise<UserPrefsResponse> {
-  const current = await getUserPreferences(userId);
-  const currentPrefs = current.notificationPrefs as unknown as NotificationPrefsRow;
+  // Verify user exists
+  const [user] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId));
 
-  const merged: NotificationPrefsRow = {
-    pace_reminders: update.paceReminders ?? currentPrefs.pace_reminders,
-  };
+  if (!user) throw new UserNotFoundError(userId);
 
-  await db.update(users).set({ notificationPrefs: merged }).where(eq(users.id, userId));
+  // Atomic JSONB merge — single statement, no TOCTOU race
+  const patch: Record<string, unknown> = {};
+  if (update.paceReminders !== undefined) {
+    patch.pace_reminders = update.paceReminders;
+  }
 
-  return { notificationPrefs: merged };
+  await db
+    .update(users)
+    .set({
+      notificationPrefs: sql`COALESCE(notification_prefs, '{}'::jsonb) || ${JSON.stringify(patch)}::jsonb`,
+    })
+    .where(eq(users.id, userId));
+
+  // Read back the merged result
+  return getUserPreferences(userId);
 }

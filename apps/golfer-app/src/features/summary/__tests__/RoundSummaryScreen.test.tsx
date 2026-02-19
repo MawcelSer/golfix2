@@ -17,7 +17,7 @@ vi.mock("@/stores/course-store", () => ({
   ),
 }));
 
-const mockScores = new Map<number, LocalScore>();
+let mockScores: Map<number, LocalScore>;
 const mockReset = vi.fn();
 let mockRoundId: string | null = "r1";
 
@@ -61,7 +61,7 @@ describe("RoundSummaryScreen", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCourseData = null;
-    mockScores.clear();
+    mockScores = new Map();
     mockRoundId = "r1";
   });
 

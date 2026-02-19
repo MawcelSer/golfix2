@@ -31,12 +31,16 @@ export function ScorecardScreen() {
 
   const handlePrev = useCallback(async () => {
     await saveScore(currentHole);
-    setCurrentHole(currentHole - 1);
+    if (!useRoundStore.getState().error) {
+      setCurrentHole(currentHole - 1);
+    }
   }, [currentHole, saveScore, setCurrentHole]);
 
   const handleNext = useCallback(async () => {
     await saveScore(currentHole);
-    setCurrentHole(currentHole + 1);
+    if (!useRoundStore.getState().error) {
+      setCurrentHole(currentHole + 1);
+    }
   }, [currentHole, saveScore, setCurrentHole]);
 
   const handleFinish = useCallback(async () => {
@@ -45,9 +49,10 @@ export function ScorecardScreen() {
 
     // Save current hole before finishing
     await saveScore(currentHole);
+    if (useRoundStore.getState().error) return;
+
     await finishSession("finished");
-    // Only navigate if the API call succeeded (status changed to "ended")
-    if (useSessionStore.getState().status === "ended") {
+    if (!useSessionStore.getState().error) {
       navigate("/summary");
     }
   }, [currentHole, saveScore, finishSession, navigate]);

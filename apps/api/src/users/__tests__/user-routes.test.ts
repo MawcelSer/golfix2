@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "../../app";
 import { db } from "../../db/connection";
 import { users } from "../../db/schema/core";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-change-me";
@@ -35,8 +36,14 @@ describe("User preference routes", () => {
         passwordHash: "unused",
       })
       .returning({ id: users.id });
-    userId = user!.id;
+
+    if (!user) throw new Error("Test setup failed: could not insert test user");
+    userId = user.id;
     token = makeToken(userId);
+  });
+
+  afterEach(async () => {
+    await db.delete(users).where(eq(users.id, userId));
   });
 
   describe("GET /users/me/preferences", () => {
@@ -59,6 +66,31 @@ describe("User preference routes", () => {
       });
 
       expect(res.statusCode).toBe(401);
+    });
+
+    it("returns 404 when authenticated user no longer exists", async () => {
+      // Delete the user first
+      await db.delete(users).where(eq(users.id, userId));
+
+      const res = await app.inject({
+        method: "GET",
+        url: `${BASE}/users/me/preferences`,
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(res.statusCode).toBe(404);
+
+      // Re-create user so afterEach cleanup doesn't fail
+      const [user] = await db
+        .insert(users)
+        .values({
+          id: userId,
+          displayName: "Test Prefs User",
+          email: `prefs-recreated-${Date.now()}@test.com`,
+          passwordHash: "unused",
+        })
+        .returning({ id: users.id });
+      if (!user) throw new Error("Test cleanup: could not re-insert user");
     });
   });
 
@@ -101,6 +133,28 @@ describe("User preference routes", () => {
         url: `${BASE}/users/me/preferences`,
         headers: { authorization: `Bearer ${token}` },
         payload: { paceReminders: "not-a-boolean" },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it("rejects empty payload", async () => {
+      const res = await app.inject({
+        method: "PATCH",
+        url: `${BASE}/users/me/preferences`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: {},
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it("rejects unknown fields", async () => {
+      const res = await app.inject({
+        method: "PATCH",
+        url: `${BASE}/users/me/preferences`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: { paceReminders: false, adminFlag: true },
       });
 
       expect(res.statusCode).toBe(400);

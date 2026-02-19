@@ -65,6 +65,7 @@ export async function buildApp() {
       await api.register(scoringRoutes);
 
       const { userRoutes } = await import("./users/user-routes");
+      // No prefix: routes declare their own full paths (/users/me/...)
       await api.register(userRoutes);
 
       const { teeTimeRoutes } = await import("./tee-times/tee-time-routes");

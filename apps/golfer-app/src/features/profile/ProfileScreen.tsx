@@ -2,18 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth-store";
 import { apiClient } from "@/services/api-client";
-import type { UserPrefsResponse } from "@golfix/shared";
-
-interface NotificationPrefsRow {
-  pace_reminders: boolean;
-}
+import type { UserPrefsResponse, NotificationPrefs } from "@golfix/shared";
 
 export function ProfileScreen() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  const [paceReminders, setPaceReminders] = useState(true);
+  const [paceReminders, setPaceReminders] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,13 +19,14 @@ export function ProfileScreen() {
       .get<UserPrefsResponse>("/users/me/preferences")
       .then((data) => {
         if (stale) return;
-        const prefs = data.notificationPrefs as unknown as NotificationPrefsRow;
+        const prefs: NotificationPrefs = data.notificationPrefs;
         setPaceReminders(prefs.pace_reminders);
         setLoading(false);
       })
       .catch((err: unknown) => {
         if (stale) return;
         console.warn("Failed to load preferences:", err);
+        setPaceReminders(true); // fallback to default on error
         setLoading(false);
       });
 
@@ -39,6 +36,7 @@ export function ProfileScreen() {
   }, []);
 
   const handleToggle = useCallback(async () => {
+    if (paceReminders === null) return;
     const newValue = !paceReminders;
     setPaceReminders(newValue); // optimistic
 
@@ -77,8 +75,8 @@ export function ProfileScreen() {
           <button
             type="button"
             role="switch"
-            aria-checked={paceReminders}
-            disabled={loading}
+            aria-checked={paceReminders ?? false}
+            disabled={loading || paceReminders === null}
             onClick={handleToggle}
             className={`relative h-7 w-12 rounded-full transition-colors ${
               paceReminders ? "bg-green-mid" : "bg-cream/20"
