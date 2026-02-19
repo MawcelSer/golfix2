@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SocketClient } from "../services/socket-client";
 import { useAuthStore } from "../stores/auth-store";
-import { useGeolocation } from "./use-geolocation";
+import { useSessionStore } from "../stores/session-store";
+import { enqueuePosition, drainAll, clearQueue } from "../services/position-queue";
+import { apiClient } from "../services/api-client";
 import { WS_URL } from "../lib/constants";
+import type { GpsPosition } from "./use-geolocation";
+import type { PositionUpdate } from "@golfix/shared";
 
 const POSITION_INTERVAL_MS = 5000;
 
@@ -11,15 +15,15 @@ interface UseSocketResult {
   error: string | null;
 }
 
-export function useSocket(sessionId: string | null, courseId: string | null): UseSocketResult {
+export function useSocket(position: GpsPosition | null): UseSocketResult {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const clientRef = useRef<SocketClient | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { position } = useGeolocation();
+  const sessionId = useSessionStore((s) => s.sessionId);
+  const courseId = useSessionStore((s) => s.courseId);
 
-  // Keep position in a ref so the interval callback always reads the latest
   const positionRef = useRef(position);
   positionRef.current = position;
 
@@ -30,19 +34,47 @@ export function useSocket(sessionId: string | null, courseId: string | null): Us
     }
   }, []);
 
+  const drainQueueToApi = useCallback(async (sid: string) => {
+    try {
+      const pending = await drainAll();
+      if (pending.length === 0) return;
+
+      const positions = pending.map(({ lat, lng, accuracy, recordedAt }) => ({
+        lat,
+        lng,
+        accuracy,
+        recordedAt,
+      }));
+
+      await apiClient.post("/positions/batch", { sessionId: sid, positions });
+      await clearQueue();
+    } catch (err) {
+      console.warn("[useSocket] Failed to drain position queue:", err);
+    }
+  }, []);
+
   const startPositionInterval = useCallback(
     (client: SocketClient, sid: string) => {
       clearPositionInterval();
-      intervalRef.current = setInterval(() => {
+      intervalRef.current = setInterval(async () => {
         const pos = positionRef.current;
-        if (!pos || !client.connected) return;
-        client.sendPosition({
+        if (!pos) return;
+
+        const update: PositionUpdate = {
           sessionId: sid,
           lat: pos.lat,
           lng: pos.lng,
           accuracy: pos.accuracy,
           recordedAt: new Date().toISOString(),
-        });
+        };
+
+        // Always enqueue for offline resilience
+        await enqueuePosition(update);
+
+        // Send via WS if connected
+        if (client.connected) {
+          client.sendPosition(update);
+        }
       }, POSITION_INTERVAL_MS);
     },
     [clearPositionInterval],
@@ -61,15 +93,14 @@ export function useSocket(sessionId: string | null, courseId: string | null): Us
       setError(null);
       client.joinRoom(courseId);
       startPositionInterval(client, sessionId);
+      // Replay offline queue on connect/reconnect
+      drainQueueToApi(sessionId);
     });
 
     client.onDisconnect(() => {
       setConnected(false);
       clearPositionInterval();
     });
-
-    // socket.io-client fires "connect" again after auto-reconnect
-    // onConnect above handles re-joining + restarting interval
 
     client.onError((err) => {
       setError(err.message);
@@ -80,9 +111,8 @@ export function useSocket(sessionId: string | null, courseId: string | null): Us
       client.leaveRoom(courseId);
       client.destroy();
       clientRef.current = null;
-      setConnected(false);
     };
-  }, [sessionId, courseId, accessToken, startPositionInterval, clearPositionInterval]);
+  }, [sessionId, courseId, accessToken, startPositionInterval, clearPositionInterval, drainQueueToApi]);
 
   // Refresh auth when accessToken changes mid-session
   useEffect(() => {

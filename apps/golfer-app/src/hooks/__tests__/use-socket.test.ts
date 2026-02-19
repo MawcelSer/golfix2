@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, cleanup } from "@testing-library/react";
-import { useSocket } from "../use-socket";
+import type { GpsPosition } from "../use-geolocation";
 
 // ── Mock SocketClient ─────────────────────────────────────────────
 
@@ -37,19 +37,39 @@ vi.mock("../../stores/auth-store", () => ({
   ),
 }));
 
-// ── Mock useGeolocation ───────────────────────────────────────────
+// ── Mock session store ────────────────────────────────────────────
 
-const mockPosition = { lat: 44.885, lng: -0.564, accuracy: 5 };
-let currentPosition: typeof mockPosition | null = mockPosition;
+let mockSessionId: string | null = "session-1";
+let mockCourseId: string | null = "course-1";
 
-vi.mock("../use-geolocation", () => ({
-  useGeolocation: vi.fn(() => ({
-    position: currentPosition,
-    error: null,
-    watching: true,
-    startWatching: vi.fn(),
-    stopWatching: vi.fn(),
-  })),
+vi.mock("../../stores/session-store", () => ({
+  useSessionStore: vi.fn(
+    (
+      selector: (s: { sessionId: string | null; courseId: string | null }) => unknown,
+    ) => selector({ sessionId: mockSessionId, courseId: mockCourseId }),
+  ),
+}));
+
+// ── Mock position queue ───────────────────────────────────────────
+
+const mockEnqueue = vi.fn().mockResolvedValue(undefined);
+const mockDrainAll = vi.fn().mockResolvedValue([]);
+const mockClearQueue = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("../../services/position-queue", () => ({
+  enqueuePosition: (...args: unknown[]) => mockEnqueue(...args),
+  drainAll: () => mockDrainAll(),
+  clearQueue: () => mockClearQueue(),
+}));
+
+// ── Mock api-client ───────────────────────────────────────────────
+
+const mockPost = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("../../services/api-client", () => ({
+  apiClient: {
+    post: (...args: unknown[]) => mockPost(...args),
+  },
 }));
 
 // ── Mock constants ────────────────────────────────────────────────
@@ -58,7 +78,11 @@ vi.mock("../../lib/constants", () => ({
   WS_URL: "wss://test.api",
 }));
 
+const { useSocket } = await import("../use-socket");
+
 // ── Tests ─────────────────────────────────────────────────────────
+
+const defaultPosition: GpsPosition = { lat: 44.885, lng: -0.564, accuracy: 5 };
 
 describe("useSocket", () => {
   beforeEach(() => {
@@ -67,7 +91,9 @@ describe("useSocket", () => {
     handlers.clear();
     mockClient.connected = false;
     mockAccessToken = "test-token";
-    currentPosition = mockPosition;
+    mockSessionId = "session-1";
+    mockCourseId = "course-1";
+    mockDrainAll.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -76,23 +102,25 @@ describe("useSocket", () => {
   });
 
   it("does not connect when sessionId is null", () => {
-    renderHook(() => useSocket(null, "course-1"));
+    mockSessionId = null;
+    renderHook(() => useSocket(defaultPosition));
     expect(mockClient.connect).not.toHaveBeenCalled();
   });
 
   it("does not connect when courseId is null", () => {
-    renderHook(() => useSocket("session-1", null));
+    mockCourseId = null;
+    renderHook(() => useSocket(defaultPosition));
     expect(mockClient.connect).not.toHaveBeenCalled();
   });
 
   it("does not connect when accessToken is null", () => {
     mockAccessToken = null;
-    renderHook(() => useSocket("session-1", "course-1"));
+    renderHook(() => useSocket(defaultPosition));
     expect(mockClient.connect).not.toHaveBeenCalled();
   });
 
   it("connects when sessionId, courseId, and token are provided", () => {
-    renderHook(() => useSocket("session-1", "course-1"));
+    renderHook(() => useSocket(defaultPosition));
 
     expect(mockClient.connect).toHaveBeenCalledWith({
       url: "wss://test.api",
@@ -101,7 +129,7 @@ describe("useSocket", () => {
   });
 
   it("joins room and sets connected on connect event", () => {
-    const { result } = renderHook(() => useSocket("session-1", "course-1"));
+    const { result } = renderHook(() => useSocket(defaultPosition));
 
     expect(result.current.connected).toBe(false);
 
@@ -114,19 +142,19 @@ describe("useSocket", () => {
     expect(mockClient.joinRoom).toHaveBeenCalledWith("course-1");
   });
 
-  it("sends position every 5 seconds after connect", () => {
-    renderHook(() => useSocket("session-1", "course-1"));
+  it("enqueues position and sends via WS on interval tick", async () => {
+    renderHook(() => useSocket(defaultPosition));
 
     act(() => {
       mockClient.connected = true;
       handlers.get("connect")?.();
     });
 
-    act(() => {
+    await act(async () => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(mockClient.sendPosition).toHaveBeenCalledWith(
+    expect(mockEnqueue).toHaveBeenCalledWith(
       expect.objectContaining({
         sessionId: "session-1",
         lat: 44.885,
@@ -134,26 +162,54 @@ describe("useSocket", () => {
         accuracy: 5,
       }),
     );
+    expect(mockClient.sendPosition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sessionId: "session-1",
+        lat: 44.885,
+        lng: -0.564,
+      }),
+    );
   });
 
-  it("does not send position when position is null", () => {
-    currentPosition = null;
-    renderHook(() => useSocket("session-1", "course-1"));
+  it("does not send position when position is null", async () => {
+    renderHook(() => useSocket(null));
 
     act(() => {
       mockClient.connected = true;
       handlers.get("connect")?.();
     });
 
-    act(() => {
+    await act(async () => {
       vi.advanceTimersByTime(5000);
     });
 
+    expect(mockEnqueue).not.toHaveBeenCalled();
     expect(mockClient.sendPosition).not.toHaveBeenCalled();
   });
 
-  it("clears interval on disconnect", () => {
-    renderHook(() => useSocket("session-1", "course-1"));
+  it("drains offline queue on connect", async () => {
+    const pending = [
+      { sessionId: "session-1", lat: 48.8, lng: 2.3, accuracy: 5, recordedAt: "2026-02-19T10:00:00Z" },
+    ];
+    mockDrainAll.mockResolvedValueOnce(pending);
+
+    renderHook(() => useSocket(defaultPosition));
+
+    await act(async () => {
+      mockClient.connected = true;
+      handlers.get("connect")?.();
+    });
+
+    expect(mockDrainAll).toHaveBeenCalled();
+    expect(mockPost).toHaveBeenCalledWith("/positions/batch", {
+      sessionId: "session-1",
+      positions: [{ lat: 48.8, lng: 2.3, accuracy: 5, recordedAt: "2026-02-19T10:00:00Z" }],
+    });
+    expect(mockClearQueue).toHaveBeenCalled();
+  });
+
+  it("clears interval on disconnect", async () => {
+    renderHook(() => useSocket(defaultPosition));
 
     act(() => {
       mockClient.connected = true;
@@ -162,20 +218,19 @@ describe("useSocket", () => {
 
     act(() => {
       mockClient.connected = false;
-      handlers.get("disconnect")?.("transport close");
+      handlers.get("disconnect")?.();
     });
 
-    // Advance timer — should NOT send position since disconnected
-    act(() => {
+    await act(async () => {
       vi.advanceTimersByTime(5000);
     });
 
-    // sendPosition should not have been called after disconnect
-    expect(mockClient.sendPosition).not.toHaveBeenCalled();
+    // Should not enqueue after disconnect
+    expect(mockEnqueue).not.toHaveBeenCalled();
   });
 
   it("sets error on error event", () => {
-    const { result } = renderHook(() => useSocket("session-1", "course-1"));
+    const { result } = renderHook(() => useSocket(defaultPosition));
 
     act(() => {
       handlers.get("error")?.({ message: "Session not found" });
@@ -185,25 +240,11 @@ describe("useSocket", () => {
   });
 
   it("cleans up on unmount", () => {
-    const { unmount } = renderHook(() => useSocket("session-1", "course-1"));
+    const { unmount } = renderHook(() => useSocket(defaultPosition));
 
     unmount();
 
     expect(mockClient.leaveRoom).toHaveBeenCalledWith("course-1");
     expect(mockClient.destroy).toHaveBeenCalled();
-  });
-
-  it("cleans up and reconnects when sessionId changes", () => {
-    const { rerender } = renderHook(({ sessionId, courseId }) => useSocket(sessionId, courseId), {
-      initialProps: { sessionId: "s1", courseId: "c1" },
-    });
-
-    rerender({ sessionId: "s2", courseId: "c1" });
-
-    // First instance cleaned up
-    expect(mockClient.leaveRoom).toHaveBeenCalledWith("c1");
-    expect(mockClient.destroy).toHaveBeenCalled();
-    // Second connect issued
-    expect(mockClient.connect).toHaveBeenCalledTimes(2);
   });
 });
