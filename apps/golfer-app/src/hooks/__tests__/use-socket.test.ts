@@ -53,12 +53,12 @@ vi.mock("../../stores/session-store", () => ({
 
 const mockEnqueue = vi.fn().mockResolvedValue(undefined);
 const mockDrainAll = vi.fn().mockResolvedValue([]);
-const mockClearQueue = vi.fn().mockResolvedValue(undefined);
+const mockRemoveN = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("../../services/position-queue", () => ({
   enqueuePosition: (...args: unknown[]) => mockEnqueue(...args),
   drainAll: () => mockDrainAll(),
-  clearQueue: () => mockClearQueue(),
+  removeN: (...args: unknown[]) => mockRemoveN(...args),
 }));
 
 // ── Mock api-client ───────────────────────────────────────────────
@@ -210,10 +210,10 @@ describe("useSocket", () => {
       sessionId: "session-1",
       positions: [{ lat: 48.8, lng: 2.3, accuracy: 5, recordedAt: "2026-02-19T10:00:00Z" }],
     });
-    expect(mockClearQueue).toHaveBeenCalled();
+    expect(mockRemoveN).toHaveBeenCalledWith(1);
   });
 
-  it("clears interval on disconnect", async () => {
+  it("keeps enqueueing to offline queue after disconnect", async () => {
     renderHook(() => useSocket(defaultPosition));
 
     act(() => {
@@ -230,8 +230,10 @@ describe("useSocket", () => {
       vi.advanceTimersByTime(5000);
     });
 
-    // Should not enqueue after disconnect
-    expect(mockEnqueue).not.toHaveBeenCalled();
+    // Should still enqueue for offline resilience
+    expect(mockEnqueue).toHaveBeenCalled();
+    // But should NOT send via WS (disconnected)
+    expect(mockClient.sendPosition).not.toHaveBeenCalled();
   });
 
   it("sets error on error event", () => {

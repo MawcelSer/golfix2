@@ -92,7 +92,7 @@ export function GpsScreen() {
   }
 
   // Session confirmation — show before starting GPS
-  if (sessionStatus === "idle") {
+  if (sessionStatus === "idle" || sessionStatus === "starting") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 px-6">
         <h2 className="text-xl font-semibold text-cream">{courseData.name}</h2>
@@ -103,9 +103,10 @@ export function GpsScreen() {
         <button
           type="button"
           onClick={() => sessionStart(courseData.id)}
-          className="w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream"
+          disabled={sessionStatus === "starting"}
+          className="w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream disabled:opacity-50"
         >
-          Commencer la session
+          {sessionStatus === "starting" ? "Démarrage…" : "Commencer la session"}
         </button>
       </div>
     );

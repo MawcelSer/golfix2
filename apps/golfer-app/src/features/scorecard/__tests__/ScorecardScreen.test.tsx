@@ -51,15 +51,20 @@ vi.mock("@/stores/round-store", () => ({
 let mockSessionStatus = "idle";
 const mockFinishSession = vi.fn().mockResolvedValue(undefined);
 
-vi.mock("@/stores/session-store", () => ({
-  useSessionStore: vi.fn(
-    (selector: (s: { status: string; finishSession: typeof mockFinishSession }) => unknown) =>
-      selector({
-        status: mockSessionStatus,
-        finishSession: mockFinishSession,
-      }),
-  ),
-}));
+const sessionStoreState = () => ({
+  status: mockSessionStatus,
+  finishSession: mockFinishSession,
+});
+
+vi.mock("@/stores/session-store", () => {
+  const useSessionStore = Object.assign(
+    vi.fn((selector: (s: ReturnType<typeof sessionStoreState>) => unknown) =>
+      selector(sessionStoreState()),
+    ),
+    { getState: () => sessionStoreState() },
+  );
+  return { useSessionStore };
+});
 
 const { ScorecardScreen } = await import("../ScorecardScreen");
 
@@ -292,6 +297,10 @@ describe("ScorecardScreen", () => {
       synced: false,
     });
 
+    // Simulate successful finish — store updates status to "ended"
+    mockFinishSession.mockImplementationOnce(async () => {
+      mockSessionStatus = "ended";
+    });
     vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 
     renderScorecard();
@@ -302,6 +311,33 @@ describe("ScorecardScreen", () => {
       expect(mockFinishSession).toHaveBeenCalledWith("finished");
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
+  });
+
+  it("does not navigate when finishSession fails", async () => {
+    mockCourseData = makeCourse();
+    mockSessionStatus = "active";
+    mockScores.set(1, {
+      strokes: 3,
+      putts: 0,
+      fairwayHit: null,
+      greenInRegulation: null,
+      synced: false,
+    });
+
+    // finishSession resolves but does NOT change status (simulates internal error handling)
+    mockFinishSession.mockImplementationOnce(async () => {
+      // Status stays "active" — store caught the error internally
+    });
+    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
+
+    renderScorecard();
+
+    fireEvent.click(screen.getByText("Terminer la partie"));
+
+    await waitFor(() => {
+      expect(mockFinishSession).toHaveBeenCalledWith("finished");
+    });
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("does not finish session when confirm is cancelled", async () => {

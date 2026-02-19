@@ -8,14 +8,15 @@ const positionStore = createStore("golfix-positions", "queue");
 
 export async function enqueuePosition(position: PositionUpdate): Promise<void> {
   try {
-    const queue = (await get<PositionUpdate[]>(STORE_KEY, positionStore)) ?? [];
+    const existing = (await get<PositionUpdate[]>(STORE_KEY, positionStore)) ?? [];
 
-    while (queue.length >= MAX_QUEUE_SIZE) {
-      queue.shift();
-    }
+    // Immutable FIFO eviction — keep newest entries to make room
+    const trimmed =
+      existing.length >= MAX_QUEUE_SIZE
+        ? existing.slice(existing.length - MAX_QUEUE_SIZE + 1)
+        : existing;
 
-    queue.push(position);
-    await set(STORE_KEY, queue, positionStore);
+    await set(STORE_KEY, [...trimmed, position], positionStore);
   } catch (err) {
     console.warn("[position-queue] Failed to enqueue:", err);
   }
@@ -27,6 +28,24 @@ export async function drainAll(): Promise<PositionUpdate[]> {
   } catch (err) {
     console.warn("[position-queue] Failed to drain:", err);
     return [];
+  }
+}
+
+/**
+ * Remove the first `count` entries from the queue.
+ * Used after a successful batch POST to avoid deleting
+ * positions that were enqueued during the API call.
+ */
+export async function removeN(count: number): Promise<void> {
+  try {
+    const queue = (await get<PositionUpdate[]>(STORE_KEY, positionStore)) ?? [];
+    if (count >= queue.length) {
+      await del(STORE_KEY, positionStore);
+    } else {
+      await set(STORE_KEY, queue.slice(count), positionStore);
+    }
+  } catch (err) {
+    console.warn("[position-queue] Failed to remove:", err);
   }
 }
 

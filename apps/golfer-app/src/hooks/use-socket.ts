@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { SocketClient } from "../services/socket-client";
 import { useAuthStore } from "../stores/auth-store";
 import { useSessionStore } from "../stores/session-store";
-import { enqueuePosition, drainAll, clearQueue } from "../services/position-queue";
+import { enqueuePosition, drainAll, removeN } from "../services/position-queue";
 import { apiClient } from "../services/api-client";
 import { WS_URL } from "../lib/constants";
 import type { GpsPosition } from "./use-geolocation";
@@ -47,7 +47,8 @@ export function useSocket(position: GpsPosition | null): UseSocketResult {
       }));
 
       await apiClient.post("/positions/batch", { sessionId: sid, positions });
-      await clearQueue();
+      // Only remove the items we sent — new items enqueued during POST are preserved
+      await removeN(pending.length);
     } catch (err) {
       console.warn("[useSocket] Failed to drain position queue:", err);
     }
@@ -99,7 +100,8 @@ export function useSocket(position: GpsPosition | null): UseSocketResult {
 
     client.onDisconnect(() => {
       setConnected(false);
-      clearPositionInterval();
+      // Do NOT clear interval — positions keep enqueueing to IndexedDB offline
+      // and will be drained on the next reconnect
     });
 
     client.onError((err) => {

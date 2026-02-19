@@ -2,21 +2,25 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { PositionUpdate } from "@golfix/shared";
 
 const mockStore = new Map<string, unknown>();
+const mockGet = vi.fn((key: string) => Promise.resolve(mockStore.get(key) ?? undefined));
+const mockSet = vi.fn((key: string, val: unknown) => {
+  mockStore.set(key, val);
+  return Promise.resolve();
+});
+const mockDel = vi.fn((key: string) => {
+  mockStore.delete(key);
+  return Promise.resolve();
+});
 
 vi.mock("idb-keyval", () => ({
-  get: vi.fn((key: string) => Promise.resolve(mockStore.get(key) ?? undefined)),
-  set: vi.fn((key: string, val: unknown) => {
-    mockStore.set(key, val);
-    return Promise.resolve();
-  }),
-  del: vi.fn((key: string) => {
-    mockStore.delete(key);
-    return Promise.resolve();
-  }),
+  get: (...args: unknown[]) => mockGet(...(args as [string])),
+  set: (...args: unknown[]) => mockSet(...(args as [string, unknown])),
+  del: (...args: unknown[]) => mockDel(...(args as [string])),
   createStore: vi.fn(() => ({})),
 }));
 
-const { enqueuePosition, drainAll, queueSize, clearQueue } = await import("../position-queue");
+const { enqueuePosition, drainAll, removeN, queueSize, clearQueue } =
+  await import("../position-queue");
 
 function makePosition(index: number): PositionUpdate {
   return {
@@ -67,9 +71,35 @@ describe("position-queue", () => {
     expect(await queueSize()).toBe(5);
   });
 
-  it("handles IndexedDB errors gracefully", async () => {
-    // drainAll should never throw — catches internally
+  it("removeN removes only first N entries", async () => {
+    for (let i = 0; i < 5; i++) {
+      await enqueuePosition(makePosition(i));
+    }
+    await removeN(3);
+    expect(await queueSize()).toBe(2);
+
+    const remaining = await drainAll();
+    expect(remaining[0]?.lat).toBeCloseTo(48.8 + 3 * 0.001);
+  });
+
+  it("removeN clears all when count >= queue length", async () => {
+    await enqueuePosition(makePosition(1));
+    await enqueuePosition(makePosition(2));
+    await removeN(5);
+    expect(await queueSize()).toBe(0);
+  });
+
+  it("returns empty array and does not throw on IndexedDB error", async () => {
+    mockGet.mockRejectedValueOnce(new Error("QuotaExceededError"));
     const result = await drainAll();
-    expect(Array.isArray(result)).toBe(true);
+    expect(result).toEqual([]);
+  });
+
+  it("enqueue does not throw on IndexedDB error", async () => {
+    mockGet.mockRejectedValueOnce(new Error("QuotaExceededError"));
+    // Should not throw
+    await enqueuePosition(makePosition(1));
+    // Queue is empty because enqueue failed gracefully
+    expect(await queueSize()).toBe(0);
   });
 });

@@ -44,7 +44,10 @@ export function ScorecardScreen() {
     if (!confirmed) return;
 
     await finishSession("finished");
-    navigate("/");
+    // Only navigate if the API call succeeded (status changed to "ended")
+    if (useSessionStore.getState().status === "ended") {
+      navigate("/");
+    }
   }, [finishSession, navigate]);
 
   if (!courseData) {

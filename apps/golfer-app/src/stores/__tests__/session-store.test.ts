@@ -61,6 +61,14 @@ describe("session-store", () => {
 
       expect(mockPost).not.toHaveBeenCalled();
     });
+
+    it("prevents starting when status is 'starting'", async () => {
+      useSessionStore.setState({ status: "starting" });
+
+      await useSessionStore.getState().startSession("c1");
+
+      expect(mockPost).not.toHaveBeenCalled();
+    });
   });
 
   describe("finishSession", () => {

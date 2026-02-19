@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { apiClient } from "@/services/api-client";
 import type { StartSessionResponse, SessionResponse } from "@golfix/shared";
 
-type SessionStatus = "idle" | "active" | "finishing" | "ended";
+type SessionStatus = "idle" | "starting" | "active" | "finishing" | "ended";
 
 interface SessionState {
   sessionId: string | null;
@@ -28,9 +28,10 @@ export const useSessionStore = create<SessionState & SessionActions>()((set, get
   ...initialState,
 
   startSession: async (courseId) => {
-    if (get().status === "active") return;
+    const currentStatus = get().status;
+    if (currentStatus === "active" || currentStatus === "starting") return;
 
-    set({ status: "idle", error: null });
+    set({ status: "starting", error: null });
 
     try {
       const result = await apiClient.post<StartSessionResponse>("/sessions/start", { courseId });

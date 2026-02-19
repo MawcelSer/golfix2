@@ -164,6 +164,16 @@ describe("GpsScreen", () => {
     expect(screen.getByText("Network error")).toBeInTheDocument();
   });
 
+  it("disables button and shows loading text when session is starting", () => {
+    mockCourseData.courseData = makeCourse();
+    mockSessionStatus = "starting";
+    renderGps();
+
+    const button = screen.getByText("Démarrage…");
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
+  });
+
   it("displays distances when session is active and GPS is available", () => {
     mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
