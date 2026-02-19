@@ -44,9 +44,8 @@ let mockCourseId: string | null = "course-1";
 
 vi.mock("../../stores/session-store", () => ({
   useSessionStore: vi.fn(
-    (
-      selector: (s: { sessionId: string | null; courseId: string | null }) => unknown,
-    ) => selector({ sessionId: mockSessionId, courseId: mockCourseId }),
+    (selector: (s: { sessionId: string | null; courseId: string | null }) => unknown) =>
+      selector({ sessionId: mockSessionId, courseId: mockCourseId }),
   ),
 }));
 
@@ -189,7 +188,13 @@ describe("useSocket", () => {
 
   it("drains offline queue on connect", async () => {
     const pending = [
-      { sessionId: "session-1", lat: 48.8, lng: 2.3, accuracy: 5, recordedAt: "2026-02-19T10:00:00Z" },
+      {
+        sessionId: "session-1",
+        lat: 48.8,
+        lng: 2.3,
+        accuracy: 5,
+        recordedAt: "2026-02-19T10:00:00Z",
+      },
     ];
     mockDrainAll.mockResolvedValueOnce(pending);
 

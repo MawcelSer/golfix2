@@ -112,7 +112,14 @@ export function useSocket(position: GpsPosition | null): UseSocketResult {
       client.destroy();
       clientRef.current = null;
     };
-  }, [sessionId, courseId, accessToken, startPositionInterval, clearPositionInterval, drainQueueToApi]);
+  }, [
+    sessionId,
+    courseId,
+    accessToken,
+    startPositionInterval,
+    clearPositionInterval,
+    drainQueueToApi,
+  ]);
 
   // Refresh auth when accessToken changes mid-session
   useEffect(() => {

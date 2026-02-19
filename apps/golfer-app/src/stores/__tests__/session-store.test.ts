@@ -12,9 +12,7 @@ const { useSessionStore } = await import("../session-store");
 const { apiClient } = await import("@/services/api-client");
 
 const mockPost = vi.mocked(apiClient.post);
-const mockPatch = vi.mocked(
-  (apiClient as Record<string, unknown>).patch as typeof apiClient.post,
-);
+const mockPatch = vi.mocked((apiClient as Record<string, unknown>).patch as typeof apiClient.post);
 
 describe("session-store", () => {
   beforeEach(() => {
