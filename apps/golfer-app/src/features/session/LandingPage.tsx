@@ -24,19 +24,29 @@ export function LandingPage() {
     () => localStorage.getItem("golfix-install-dismissed") === "true",
   );
 
-  function handleDismissInstall() {
+  const handleDismissInstall = useCallback(() => {
     setInstallDismissed(true);
     localStorage.setItem("golfix-install-dismissed", "true");
-  }
+  }, []);
 
+  // H5: staleness guard on rounds fetch
   useEffect(() => {
+    let stale = false;
+
     apiClient
       .get<RoundSummaryResponse[]>("/users/me/rounds")
-      .then(setRounds)
+      .then((data) => {
+        if (!stale) setRounds(data);
+      })
       .catch((err: unknown) => {
+        if (stale) return;
         if (err instanceof ApiError && err.status === 401) return;
         console.error("Failed to fetch rounds:", err);
       });
+
+    return () => {
+      stale = true;
+    };
   }, []);
 
   const locateCourse = useCallback(async () => {
@@ -68,20 +78,20 @@ export function LandingPage() {
     }
   }, [position, startWatching, navigate]);
 
-  function handleStart() {
+  const handleStart = useCallback(() => {
     if (!gdprConsent) {
       setShowGdpr(true);
       return;
     }
     locateCourse();
-  }
+  }, [gdprConsent, locateCourse]);
 
-  function handleGdprClose() {
+  const handleGdprClose = useCallback(() => {
     setShowGdpr(false);
     if (useAuthStore.getState().gdprConsent) {
       locateCourse();
     }
-  }
+  }, [locateCourse]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-pine px-6 pt-12">

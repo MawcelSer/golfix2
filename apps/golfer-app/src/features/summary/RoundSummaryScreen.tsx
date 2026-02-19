@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCourseStore } from "@/stores/course-store";
 import { useRoundStore } from "@/stores/round-store";
@@ -13,10 +13,12 @@ export function RoundSummaryScreen() {
   const scores = useRoundStore((s) => s.scores);
   const roundReset = useRoundStore((s) => s.reset);
   const sessionReset = useSessionStore((s) => s.reset);
+  const didRedirect = useRef(false);
 
-  // Redirect if no data
+  // Redirect if no data — runs only on mount
   useEffect(() => {
-    if (scores.size === 0) {
+    if (scores.size === 0 && !didRedirect.current) {
+      didRedirect.current = true;
       navigate("/", { replace: true });
     }
   }, [scores, navigate]);
@@ -27,7 +29,8 @@ export function RoundSummaryScreen() {
     navigate("/");
   }, [roundReset, sessionReset, navigate]);
 
-  if (scores.size === 0 || !courseData) return null;
+  if (scores.size === 0) return null;
+  if (!courseData) return null;
 
   const stats = computeRoundStats(scores, courseData.holes);
 
