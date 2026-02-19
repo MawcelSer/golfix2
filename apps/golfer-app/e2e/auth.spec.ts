@@ -127,7 +127,7 @@ test.describe("Post-auth navigation", () => {
     // Navigate to scorecard
     await page.getByRole("link", { name: "Carte" }).click();
     await expect(page).toHaveURL(/\/scorecard/);
-    await expect(page.getByText("Scorecard Screen")).toBeVisible();
+    await expect(page.getByText("Aucun parcours sélectionné")).toBeVisible();
 
     // Navigate to profile
     await page.getByRole("link", { name: "Profil" }).click();

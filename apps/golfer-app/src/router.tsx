@@ -6,10 +6,7 @@ import { RegisterScreen } from "@/features/auth/RegisterScreen";
 import { AnonymousScreen } from "@/features/auth/AnonymousScreen";
 import { LandingPage } from "@/features/session/LandingPage";
 import { GpsScreen } from "@/features/gps/GpsScreen";
-
-function ScorecardPlaceholder() {
-  return <div>Scorecard Screen</div>;
-}
+import { ScorecardScreen } from "@/features/scorecard/ScorecardScreen";
 
 function ProfilePlaceholder() {
   return <div>Profile Screen</div>;
@@ -45,7 +42,7 @@ export const router = createBrowserRouter([
         path: "/scorecard",
         element: (
           <AppShell>
-            <ScorecardPlaceholder />
+            <ScorecardScreen />
           </AppShell>
         ),
       },
