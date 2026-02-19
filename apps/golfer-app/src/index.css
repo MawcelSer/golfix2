@@ -10,6 +10,27 @@
   --color-forest: #1b6b2e;
   --color-green-mid: #2d8b47;
   --color-green-light: #5cb85c;
+  --color-fairway: #1a4a25;
+  --color-fairway-light: #3a7a4a;
 
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, monospace;
+}
+
+/* GPS player dot pulse animation */
+@keyframes gps-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.animate-gps-pulse {
+  animation: gps-pulse 2s ease-in-out infinite;
 }
