@@ -136,9 +136,9 @@ describe("useHoleDetection", () => {
 
   it("handles holes with null teePosition", () => {
     const holes = makeHoles();
-    holes[0]!.teePosition = null;
+    const holesWithNullTee = [{ ...holes[0]!, teePosition: null }, holes[1]!];
 
-    const { result, rerender } = renderHook(({ pos }) => useHoleDetection(pos, holes), {
+    const { result, rerender } = renderHook(({ pos }) => useHoleDetection(pos, holesWithNullTee), {
       initialProps: { pos: nearTee2 as GpsPosition | null },
     });
 

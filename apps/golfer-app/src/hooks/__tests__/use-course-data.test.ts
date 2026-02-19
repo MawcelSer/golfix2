@@ -25,9 +25,10 @@ vi.mock("@/services/api-client", () => ({
   },
 }));
 
+const mockSetCourse = vi.fn();
 vi.mock("@/stores/course-store", () => ({
   useCourseStore: {
-    getState: () => ({ setCourse: vi.fn(), clearCourse: vi.fn() }),
+    getState: () => ({ setCourse: mockSetCourse, clearCourse: vi.fn() }),
   },
 }));
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { apiClient } from "@/services/api-client";
+import { apiClient, ApiError } from "@/services/api-client";
 import { getCachedCourse, setCachedCourse } from "@/services/course-cache";
 import { useCourseStore } from "@/stores/course-store";
 import type { CourseData } from "@golfix/shared";
@@ -22,24 +22,25 @@ export function useCourseData(slug: string | null): UseCourseDataResult {
   }, [courseData]);
 
   const revalidate = useCallback(
-    async (cachedVersion: number) => {
+    async (cachedVersion: number, isStale: () => boolean) => {
       if (!slug) return;
       try {
         const fresh = await apiClient.get<CourseData>(`/courses/${slug}/data`);
+        if (isStale()) return;
         if (fresh.dataVersion !== cachedVersion) {
           setCourseData(fresh);
-          useCourseStore.getState().setCourse(slug, fresh);
+          useCourseStore.getState().setCourse(fresh);
           await setCachedCourse(fresh);
         }
-      } catch {
-        // Network error during revalidation — keep cached data
+      } catch (err) {
+        console.warn(`[useCourseData] Revalidation failed for "${slug}":`, err);
       }
     },
     [slug],
   );
 
   const fetchCourse = useCallback(
-    async (useCache: boolean) => {
+    async (useCache: boolean, isStale: () => boolean) => {
       if (!slug) return;
       setLoading(true);
       setError(null);
@@ -47,36 +48,52 @@ export function useCourseData(slug: string | null): UseCourseDataResult {
       try {
         if (useCache) {
           const cached = await getCachedCourse(slug);
+          if (isStale()) return;
           if (cached) {
             setCourseData(cached);
-            useCourseStore.getState().setCourse(slug, cached);
+            useCourseStore.getState().setCourse(cached);
             setLoading(false);
-            revalidate(cached.dataVersion);
+            revalidate(cached.dataVersion, isStale);
             return;
           }
         }
 
         const fresh = await apiClient.get<CourseData>(`/courses/${slug}/data`);
+        if (isStale()) return;
         setCourseData(fresh);
-        useCourseStore.getState().setCourse(slug, fresh);
+        useCourseStore.getState().setCourse(fresh);
         await setCachedCourse(fresh);
-      } catch {
+      } catch (err) {
+        if (isStale()) return;
+        console.warn(`[useCourseData] Failed to load course "${slug}":`, err);
         if (!hasDataRef.current) {
-          setError("Impossible de charger le parcours");
+          if (err instanceof ApiError && err.status === 401) {
+            setError("Session expirée — veuillez vous reconnecter");
+          } else if (err instanceof ApiError && err.status === 404) {
+            setError("Parcours introuvable");
+          } else {
+            setError("Impossible de charger le parcours");
+          }
         }
       } finally {
-        setLoading(false);
+        if (!isStale()) {
+          setLoading(false);
+        }
       }
     },
     [slug, revalidate],
   );
 
   useEffect(() => {
-    fetchCourse(true);
+    let stale = false;
+    fetchCourse(true, () => stale);
+    return () => {
+      stale = true;
+    };
   }, [fetchCourse]);
 
   const refetch = useCallback(() => {
-    fetchCourse(false);
+    fetchCourse(false, () => false);
   }, [fetchCourse]);
 
   return { courseData, loading, error, refetch };

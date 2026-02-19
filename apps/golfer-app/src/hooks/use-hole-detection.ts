@@ -37,13 +37,17 @@ export function useHoleDetection(
   const manualOverrideRef = useRef<number | null>(null);
   const manualTimestampRef = useRef(0);
 
-  const setManualHole = useCallback((hole: number) => {
-    setDetectedHole(hole);
-    manualOverrideRef.current = hole;
-    manualTimestampRef.current = Date.now();
-    candidateRef.current = null;
-    candidateCountRef.current = 0;
-  }, []);
+  const setManualHole = useCallback(
+    (hole: number) => {
+      if (hole < 1 || hole > holes.length) return;
+      setDetectedHole(hole);
+      manualOverrideRef.current = hole;
+      manualTimestampRef.current = Date.now();
+      candidateRef.current = null;
+      candidateCountRef.current = 0;
+    },
+    [holes.length],
+  );
 
   useEffect(() => {
     if (!position || holes.length === 0) return;

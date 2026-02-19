@@ -37,7 +37,7 @@ function makeCourse(overrides: Partial<CourseData> = {}): CourseData {
 describe("course-cache", () => {
   beforeEach(() => {
     mockStore.clear();
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns null for missing cache", async () => {
@@ -73,7 +73,7 @@ describe("course-cache", () => {
     expect(cached).toBeNull();
   });
 
-  it("validates cache version match", async () => {
+  it("validates cache version from nested data", async () => {
     await setCachedCourse(makeCourse({ dataVersion: 3 }));
     expect(await isCacheValid("test-course", 3)).toBe(true);
     expect(await isCacheValid("test-course", 4)).toBe(false);

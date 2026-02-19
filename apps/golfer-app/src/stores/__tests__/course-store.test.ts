@@ -24,7 +24,7 @@ describe("course-store", () => {
 
   it("sets course data", () => {
     const course = makeCourse();
-    useCourseStore.getState().setCourse("test-course", course);
+    useCourseStore.getState().setCourse(course);
 
     const state = useCourseStore.getState();
     expect(state.courseSlug).toBe("test-course");
@@ -32,7 +32,7 @@ describe("course-store", () => {
   });
 
   it("clears course data", () => {
-    useCourseStore.getState().setCourse("test-course", makeCourse());
+    useCourseStore.getState().setCourse(makeCourse());
     useCourseStore.getState().clearCourse();
 
     const state = useCourseStore.getState();
@@ -41,7 +41,7 @@ describe("course-store", () => {
   });
 
   it("resets to initial state on clear", () => {
-    useCourseStore.getState().setCourse("test-course", makeCourse());
+    useCourseStore.getState().setCourse(makeCourse());
     useCourseStore.getState().clearCourse();
 
     expect(useCourseStore.getState()).toMatchObject({

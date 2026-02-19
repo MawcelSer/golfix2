@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCourseData } from "@/hooks/use-course-data";
@@ -14,16 +14,20 @@ export function GpsScreen() {
   const storeSlug = useCourseStore((s) => s.courseSlug);
   const slug = paramSlug ?? storeSlug;
 
-  const { courseData, loading: courseLoading, error: courseError } = useCourseData(slug);
-  const { position, error: gpsError, watching, startWatching } = useGeolocation();
+  const { courseData, loading: courseLoading, error: courseError, refetch } = useCourseData(slug);
+  const { position, error: gpsError, startWatching } = useGeolocation();
 
   const holes = useMemo(() => courseData?.holes ?? [], [courseData]);
   const { detectedHole, nearGreen, setManualHole } = useHoleDetection(position, holes);
 
-  // Start GPS when screen mounts
+  // Start GPS once on mount — do not auto-restart on error
+  const hasStartedRef = useRef(false);
   useEffect(() => {
-    if (!watching) startWatching();
-  }, [watching, startWatching]);
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      startWatching();
+    }
+  }, [startWatching]);
 
   const hole = useMemo(
     () => courseData?.holes.find((h) => h.holeNumber === detectedHole) ?? null,
@@ -58,6 +62,13 @@ export function GpsScreen() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
         <p className="text-center text-cream/70">{courseError}</p>
+        <button
+          type="button"
+          onClick={refetch}
+          className="rounded-lg bg-green-mid px-6 py-2 text-sm font-medium text-cream"
+        >
+          Réessayer
+        </button>
       </div>
     );
   }

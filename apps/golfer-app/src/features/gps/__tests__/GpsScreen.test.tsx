@@ -91,7 +91,6 @@ describe("GpsScreen", () => {
   beforeEach(() => {
     mockGeo.position = null;
     mockGeo.error = null;
-    mockGeo.watching = false;
     mockGeo.startWatching.mockClear();
     mockSetManualHole.mockClear();
     mockHoleDetection.detectedHole = 1;
@@ -133,10 +132,16 @@ describe("GpsScreen", () => {
     expect(mockSetManualHole).toHaveBeenCalledWith(2);
   });
 
-  it("shows error when course fails to load", () => {
+  it("shows error when course fails to load with retry button", async () => {
+    const user = userEvent.setup();
     mockCourseData.error = "Impossible de charger le parcours";
     renderGps();
     expect(screen.getByText("Impossible de charger le parcours")).toBeInTheDocument();
+
+    const retryBtn = screen.getByText("Réessayer");
+    expect(retryBtn).toBeInTheDocument();
+    await user.click(retryBtn);
+    expect(mockCourseData.refetch).toHaveBeenCalled();
   });
 
   it("shows GPS error message", () => {
