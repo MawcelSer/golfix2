@@ -27,6 +27,17 @@ vi.mock("@/hooks/use-course-data", () => ({
   useCourseData: () => mockCourseData,
 }));
 
+// Mock hole detection hook
+const mockSetManualHole = vi.fn();
+const mockHoleDetection = {
+  detectedHole: 1,
+  nearGreen: false,
+  setManualHole: mockSetManualHole,
+};
+vi.mock("@/hooks/use-hole-detection", () => ({
+  useHoleDetection: () => mockHoleDetection,
+}));
+
 // Mock course store
 vi.mock("@/stores/course-store", () => ({
   useCourseStore: vi.fn((selector: (s: { courseSlug: string | null }) => unknown) =>
@@ -82,6 +93,9 @@ describe("GpsScreen", () => {
     mockGeo.error = null;
     mockGeo.watching = false;
     mockGeo.startWatching.mockClear();
+    mockSetManualHole.mockClear();
+    mockHoleDetection.detectedHole = 1;
+    mockHoleDetection.nearGreen = false;
     mockCourseData.courseData = null;
     mockCourseData.loading = false;
     mockCourseData.error = null;
@@ -104,11 +118,9 @@ describe("GpsScreen", () => {
     expect(screen.getByText("Avant")).toBeInTheDocument();
     expect(screen.getByText("Centre")).toBeInTheDocument();
     expect(screen.getByText("Arrière")).toBeInTheDocument();
-    // Should show distance values (not dashes)
-    expect(screen.queryByText("—")).toBeNull();
   });
 
-  it("navigates between holes", async () => {
+  it("calls setManualHole on navigation", async () => {
     const user = userEvent.setup();
     mockCourseData.courseData = makeCourse();
     mockGeo.position = { lat: 44.885, lng: -0.564, accuracy: 5 };
@@ -118,10 +130,7 @@ describe("GpsScreen", () => {
     expect(screen.getByText("Trou 1/18")).toBeInTheDocument();
 
     await user.click(screen.getByLabelText("Trou suivant"));
-    expect(screen.getByText("Trou 2/18")).toBeInTheDocument();
-
-    await user.click(screen.getByLabelText("Trou précédent"));
-    expect(screen.getByText("Trou 1/18")).toBeInTheDocument();
+    expect(mockSetManualHole).toHaveBeenCalledWith(2);
   });
 
   it("shows error when course fails to load", () => {

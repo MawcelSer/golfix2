@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCourseData } from "@/hooks/use-course-data";
+import { useHoleDetection } from "@/hooks/use-hole-detection";
 import { useCourseStore } from "@/stores/course-store";
 import { computeHoleDistances } from "./distance-calculator";
 import { DistanceCard } from "./DistanceCard";
@@ -16,7 +17,8 @@ export function GpsScreen() {
   const { courseData, loading: courseLoading, error: courseError } = useCourseData(slug);
   const { position, error: gpsError, watching, startWatching } = useGeolocation();
 
-  const [currentHole, setCurrentHole] = useState(1);
+  const holes = useMemo(() => courseData?.holes ?? [], [courseData]);
+  const { detectedHole, nearGreen, setManualHole } = useHoleDetection(position, holes);
 
   // Start GPS when screen mounts
   useEffect(() => {
@@ -24,8 +26,8 @@ export function GpsScreen() {
   }, [watching, startWatching]);
 
   const hole = useMemo(
-    () => courseData?.holes.find((h) => h.holeNumber === currentHole) ?? null,
-    [courseData, currentHole],
+    () => courseData?.holes.find((h) => h.holeNumber === detectedHole) ?? null,
+    [courseData, detectedHole],
   );
 
   const distances = useMemo(() => {
@@ -34,13 +36,13 @@ export function GpsScreen() {
   }, [position, hole]);
 
   const handlePrev = useCallback(() => {
-    setCurrentHole((h) => Math.max(1, h - 1));
-  }, []);
+    setManualHole(Math.max(1, detectedHole - 1));
+  }, [detectedHole, setManualHole]);
 
   const handleNext = useCallback(() => {
     if (!courseData) return;
-    setCurrentHole((h) => Math.min(courseData.holesCount, h + 1));
-  }, [courseData]);
+    setManualHole(Math.min(courseData.holesCount, detectedHole + 1));
+  }, [courseData, detectedHole, setManualHole]);
 
   // Loading state
   if (courseLoading && !courseData) {
@@ -74,12 +76,17 @@ export function GpsScreen() {
       {/* Hole header */}
       <div className="mb-6 flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-mid">
-          <span className="text-xl font-bold text-cream">{currentHole}</span>
+          <span className="text-xl font-bold text-cream">{detectedHole}</span>
         </div>
         <div>
           <p className="text-lg font-semibold text-cream">Par {hole?.par ?? "—"}</p>
           <p className="text-sm text-cream/60">{hole?.distanceMeters ?? "—"} m</p>
         </div>
+        {nearGreen && (
+          <span className="rounded-full bg-green-light/20 px-3 py-1 text-xs font-medium text-green-light">
+            Sur le green
+          </span>
+        )}
       </div>
 
       {/* Distance cards */}
@@ -92,7 +99,7 @@ export function GpsScreen() {
       {/* Hole navigation */}
       <div className="mt-4">
         <HoleSelector
-          currentHole={currentHole}
+          currentHole={detectedHole}
           totalHoles={courseData.holesCount}
           onPrev={handlePrev}
           onNext={handleNext}
