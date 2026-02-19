@@ -38,5 +38,7 @@ export type {
 
 export { SOCKET_EVENTS } from "./types/socket";
 
+export type { NotificationPrefs, UpdatePrefsInput, UserPrefsResponse } from "./types/preferences";
+
 // ── Utilities ──────────────────────────────────────────────────────
 export { haversineDistance } from "./utils/haversine";

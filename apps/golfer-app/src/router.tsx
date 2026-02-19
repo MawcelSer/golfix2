@@ -7,10 +7,8 @@ import { AnonymousScreen } from "@/features/auth/AnonymousScreen";
 import { LandingPage } from "@/features/session/LandingPage";
 import { GpsScreen } from "@/features/gps/GpsScreen";
 import { ScorecardScreen } from "@/features/scorecard/ScorecardScreen";
-
-function ProfilePlaceholder() {
-  return <div>Profile Screen</div>;
-}
+import { RoundSummaryScreen } from "@/features/summary/RoundSummaryScreen";
+import { ProfileScreen } from "@/features/profile/ProfileScreen";
 
 export const router = createBrowserRouter([
   // ── Auth routes (no guard) ────────────────────────────────────────
@@ -47,10 +45,18 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/summary",
+        element: (
+          <AppShell>
+            <RoundSummaryScreen />
+          </AppShell>
+        ),
+      },
+      {
         path: "/profile",
         element: (
           <AppShell>
-            <ProfilePlaceholder />
+            <ProfileScreen />
           </AppShell>
         ),
       },

@@ -309,7 +309,8 @@ describe("ScorecardScreen", () => {
 
     await waitFor(() => {
       expect(mockFinishSession).toHaveBeenCalledWith("finished");
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(mockSaveScore).toHaveBeenCalledWith(1);
+      expect(mockNavigate).toHaveBeenCalledWith("/summary");
     });
   });
 

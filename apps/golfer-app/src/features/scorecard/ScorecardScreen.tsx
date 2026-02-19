@@ -43,12 +43,14 @@ export function ScorecardScreen() {
     const confirmed = window.confirm("Terminer la partie ?");
     if (!confirmed) return;
 
+    // Save current hole before finishing
+    await saveScore(currentHole);
     await finishSession("finished");
     // Only navigate if the API call succeeded (status changed to "ended")
     if (useSessionStore.getState().status === "ended") {
-      navigate("/");
+      navigate("/summary");
     }
-  }, [finishSession, navigate]);
+  }, [currentHole, saveScore, finishSession, navigate]);
 
   if (!courseData) {
     return (

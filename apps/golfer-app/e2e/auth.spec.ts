@@ -132,6 +132,6 @@ test.describe("Post-auth navigation", () => {
     // Navigate to profile
     await page.getByRole("link", { name: "Profil" }).click();
     await expect(page).toHaveURL(/\/profile/);
-    await expect(page.getByText("Profile Screen")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
   });
 });
