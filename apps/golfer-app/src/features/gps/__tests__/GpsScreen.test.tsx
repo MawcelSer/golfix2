@@ -40,9 +40,8 @@ vi.mock("@/hooks/use-hole-detection", () => ({
 
 // Mock course store
 vi.mock("@/stores/course-store", () => ({
-  useCourseStore: vi.fn(
-    (selector: (s: { courseSlug: string | null }) => unknown) =>
-      selector({ courseSlug: "test-course" }),
+  useCourseStore: vi.fn((selector: (s: { courseSlug: string | null }) => unknown) =>
+    selector({ courseSlug: "test-course" }),
   ),
 }));
 

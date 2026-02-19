@@ -5,17 +5,16 @@ import type { CourseData, HoleData } from "@golfix/shared";
 
 // ── Mock navigate ─────────────────────────────────────────────────────
 const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
 // ── Mock course store ─────────────────────────────────────────────────
 let mockCourseData: CourseData | null = null;
 vi.mock("@/stores/course-store", () => ({
-  useCourseStore: vi.fn(
-    (selector: (s: { courseData: CourseData | null }) => unknown) =>
-      selector({ courseData: mockCourseData }),
+  useCourseStore: vi.fn((selector: (s: { courseData: CourseData | null }) => unknown) =>
+    selector({ courseData: mockCourseData }),
   ),
 }));
 
@@ -54,12 +53,7 @@ const mockFinishSession = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/stores/session-store", () => ({
   useSessionStore: vi.fn(
-    (
-      selector: (s: {
-        status: string;
-        finishSession: typeof mockFinishSession;
-      }) => unknown,
-    ) =>
+    (selector: (s: { status: string; finishSession: typeof mockFinishSession }) => unknown) =>
       selector({
         status: mockSessionStatus,
         finishSession: mockFinishSession,
