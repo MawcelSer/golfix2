@@ -1,5 +1,5 @@
 export interface NotificationPrefs {
-  paceReminders: boolean;
+  pace_reminders: boolean;
 }
 
 export interface UpdatePrefsInput {
