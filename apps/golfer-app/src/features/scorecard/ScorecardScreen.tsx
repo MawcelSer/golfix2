@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useCourseStore } from "@/stores/course-store";
 import { useRoundStore } from "@/stores/round-store";
 import { HoleSelector } from "@/features/gps/HoleSelector";
@@ -10,27 +10,18 @@ export function ScorecardScreen() {
   const { currentHole, scores, error, saving, startRound, setCurrentHole, saveScore, reset } =
     useRoundStore();
 
-  const initializedRef = useRef(false);
-
-  // Initialize round when course is available
+  // Initialize round when course is available; reset on course change or unmount
   useEffect(() => {
-    if (!courseData || initializedRef.current) return;
-    initializedRef.current = true;
+    if (!courseData) return;
 
+    reset();
     const pars = courseData.holes.map((h) => h.par);
     startRound(courseData.id, pars);
 
     return () => {
-      initializedRef.current = false;
-    };
-  }, [courseData, startRound]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
       reset();
     };
-  }, [reset]);
+  }, [courseData, startRound, reset]);
 
   const handlePrev = useCallback(async () => {
     await saveScore(currentHole);
@@ -38,11 +29,6 @@ export function ScorecardScreen() {
   }, [currentHole, saveScore, setCurrentHole]);
 
   const handleNext = useCallback(async () => {
-    await saveScore(currentHole);
-    setCurrentHole(currentHole + 1);
-  }, [currentHole, saveScore, setCurrentHole]);
-
-  const handleAdvance = useCallback(async () => {
     await saveScore(currentHole);
     setCurrentHole(currentHole + 1);
   }, [currentHole, saveScore, setCurrentHole]);
@@ -66,7 +52,7 @@ export function ScorecardScreen() {
           holeNumber={currentHole}
           par={currentHoleData.par}
           holesCount={courseData.holesCount}
-          onAdvance={handleAdvance}
+          onAdvance={handleNext}
         />
       )}
 

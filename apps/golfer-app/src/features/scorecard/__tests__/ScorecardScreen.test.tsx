@@ -91,7 +91,7 @@ describe("ScorecardScreen", () => {
     expect(screen.getByText("Aucun parcours sélectionné")).toBeInTheDocument();
   });
 
-  it("calls startRound on mount when course is available", () => {
+  it("calls reset then startRound on mount when course is available", () => {
     mockCourseData = makeCourse();
     mockScores.set(1, {
       strokes: 3,
@@ -103,7 +103,12 @@ describe("ScorecardScreen", () => {
 
     render(<ScorecardScreen />);
 
+    expect(mockReset).toHaveBeenCalled();
     expect(mockStartRound).toHaveBeenCalledWith("c1", expect.arrayContaining([3, 3, 3, 3]));
+    // reset is called before startRound
+    const resetOrder = mockReset.mock.invocationCallOrder[0];
+    const startOrder = mockStartRound.mock.invocationCallOrder[0];
+    expect(resetOrder).toBeLessThan(startOrder!);
   });
 
   it("renders hole selector with current hole", () => {

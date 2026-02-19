@@ -114,6 +114,7 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
 
   saveScore: async (hole) => {
     const state = get();
+    if (state.saving) return;
     const score = state.scores.get(hole);
     if (!score) return;
 

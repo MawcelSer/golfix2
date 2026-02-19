@@ -201,6 +201,52 @@ describe("round-store", () => {
       expect(mockPut).toHaveBeenCalledWith("/rounds/r1/scores", expect.any(Object));
     });
 
+    it("skips concurrent saves when already saving", async () => {
+      // Make post hang so saving stays true
+      let resolvePost: (value: unknown) => void;
+      mockPost.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        }),
+      );
+
+      useRoundStore.getState().startRound("c1", pars);
+
+      // Start first save (will hang on POST /rounds)
+      const firstSave = useRoundStore.getState().saveScore(1);
+      expect(useRoundStore.getState().saving).toBe(true);
+
+      // Second save should be skipped because saving is true
+      await useRoundStore.getState().saveScore(2);
+      expect(mockPost).toHaveBeenCalledTimes(1);
+
+      // Resolve the first save
+      resolvePost!({
+        id: "r1",
+        userId: "u1",
+        courseId: "c1",
+        sessionId: null,
+        status: "in_progress",
+        startedAt: "2026-02-19T10:00:00Z",
+        finishedAt: null,
+        totalScore: null,
+        totalPutts: null,
+        scores: [],
+      });
+      mockPut.mockResolvedValueOnce({
+        id: "s1",
+        roundId: "r1",
+        holeNumber: 1,
+        strokes: 4,
+        putts: 0,
+        fairwayHit: null,
+        greenInRegulation: null,
+      });
+      await firstSave;
+
+      expect(useRoundStore.getState().saving).toBe(false);
+    });
+
     it("sets error on failure", async () => {
       mockPost.mockRejectedValueOnce(new Error("Network error"));
 
