@@ -3,7 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCourseData } from "@/hooks/use-course-data";
 import { useHoleDetection } from "@/hooks/use-hole-detection";
+import { useSocket } from "@/hooks/use-socket";
 import { useCourseStore } from "@/stores/course-store";
+import { useSessionStore } from "@/stores/session-store";
 import { computeHoleDistances } from "./distance-calculator";
 import { DistanceCard } from "./DistanceCard";
 import { HoleSelector } from "./HoleSelector";
@@ -17,17 +19,24 @@ export function GpsScreen() {
   const { courseData, loading: courseLoading, error: courseError, refetch } = useCourseData(slug);
   const { position, error: gpsError, startWatching } = useGeolocation();
 
+  const sessionStatus = useSessionStore((s) => s.status);
+  const sessionStart = useSessionStore((s) => s.startSession);
+  const sessionError = useSessionStore((s) => s.error);
+
+  // Wire WebSocket + offline queue (reads sessionId/courseId from session store)
+  useSocket(position);
+
   const holes = useMemo(() => courseData?.holes ?? [], [courseData]);
   const { detectedHole, nearGreen, setManualHole } = useHoleDetection(position, holes);
 
-  // Start GPS once on mount — do not auto-restart on error
+  // Start GPS only when session is active — not on mount
   const hasStartedRef = useRef(false);
   useEffect(() => {
-    if (!hasStartedRef.current) {
+    if (sessionStatus === "active" && !hasStartedRef.current) {
       hasStartedRef.current = true;
       startWatching();
     }
-  }, [startWatching]);
+  }, [sessionStatus, startWatching]);
 
   const hole = useMemo(
     () => courseData?.holes.find((h) => h.holeNumber === detectedHole) ?? null,
@@ -78,6 +87,26 @@ export function GpsScreen() {
     return (
       <div className="flex h-full items-center justify-center px-6">
         <p className="text-center text-cream/70">Aucun parcours sélectionné</p>
+      </div>
+    );
+  }
+
+  // Session confirmation — show before starting GPS
+  if (sessionStatus === "idle") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-6 px-6">
+        <h2 className="text-xl font-semibold text-cream">{courseData.name}</h2>
+        <p className="text-center text-sm text-cream/60">
+          {courseData.holesCount} trous — Par {courseData.par}
+        </p>
+        {sessionError && <p className="text-center text-sm text-gold">{sessionError}</p>}
+        <button
+          type="button"
+          onClick={() => sessionStart(courseData.id)}
+          className="w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream"
+        >
+          Commencer la session
+        </button>
       </div>
     );
   }
