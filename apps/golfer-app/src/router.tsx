@@ -8,6 +8,7 @@ import { LandingPage } from "@/features/session/LandingPage";
 import { GpsScreen } from "@/features/gps/GpsScreen";
 import { ScorecardScreen } from "@/features/scorecard/ScorecardScreen";
 import { RoundSummaryScreen } from "@/features/summary/RoundSummaryScreen";
+import { ProfileScreen } from "@/features/profile/ProfileScreen";
 
 export const router = createBrowserRouter([
   // ── Auth routes (no guard) ────────────────────────────────────────
@@ -55,7 +56,7 @@ export const router = createBrowserRouter([
         path: "/profile",
         element: (
           <AppShell>
-            <div>Profile Screen</div>
+            <ProfileScreen />
           </AppShell>
         ),
       },
