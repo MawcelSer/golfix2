@@ -22,10 +22,7 @@ export interface RoundStats {
   holeDetails: HoleDetail[];
 }
 
-export function computeRoundStats(
-  scores: Map<number, LocalScore>,
-  holes: HoleData[],
-): RoundStats {
+export function computeRoundStats(scores: Map<number, LocalScore>, holes: HoleData[]): RoundStats {
   let totalStrokes = 0;
   let totalPar = 0;
   let totalPutts = 0;
