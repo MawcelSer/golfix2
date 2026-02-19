@@ -96,8 +96,14 @@ async function loginAndGoToScorecard(page: Page) {
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
 
-  // Wait for course data to load on GPS screen
-  await expect(page.getByText("Trou 1/18")).toBeVisible();
+  // Wait for session confirmation screen
+  await expect(page.getByText("Royal Golf Marrakech")).toBeVisible({ timeout: 5000 });
+
+  // Start session
+  await page.getByRole("button", { name: "Commencer la session" }).click();
+
+  // Wait for GPS distances to load (session now active)
+  await expect(page.getByText("Trou 1/18")).toBeVisible({ timeout: 5000 });
 
   // Navigate to scorecard tab
   await page.getByRole("link", { name: "Carte" }).click();
