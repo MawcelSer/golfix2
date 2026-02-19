@@ -45,6 +45,33 @@ vi.mock("@/stores/course-store", () => ({
   ),
 }));
 
+// Mock session store
+let mockSessionStatus = "idle";
+let mockSessionError: string | null = null;
+const mockStartSession = vi.fn();
+
+vi.mock("@/stores/session-store", () => ({
+  useSessionStore: vi.fn(
+    (
+      selector: (s: {
+        status: string;
+        error: string | null;
+        startSession: typeof mockStartSession;
+      }) => unknown,
+    ) =>
+      selector({
+        status: mockSessionStatus,
+        error: mockSessionError,
+        startSession: mockStartSession,
+      }),
+  ),
+}));
+
+// Mock useSocket
+vi.mock("@/hooks/use-socket", () => ({
+  useSocket: () => ({ connected: false, error: null }),
+}));
+
 const { GpsScreen } = await import("../GpsScreen");
 
 function makeHole(num: number, par: number): HoleData {
@@ -93,11 +120,14 @@ describe("GpsScreen", () => {
     mockGeo.error = null;
     mockGeo.startWatching.mockClear();
     mockSetManualHole.mockClear();
+    mockStartSession.mockClear();
     mockHoleDetection.detectedHole = 1;
     mockHoleDetection.nearGreen = false;
     mockCourseData.courseData = null;
     mockCourseData.loading = false;
     mockCourseData.error = null;
+    mockSessionStatus = "idle";
+    mockSessionError = null;
   });
 
   afterEach(cleanup);
@@ -108,7 +138,44 @@ describe("GpsScreen", () => {
     expect(screen.getByText("Chargement du parcours…")).toBeInTheDocument();
   });
 
-  it("displays distances when GPS and course are available", () => {
+  it("shows session confirmation when course loaded and session is idle", () => {
+    mockCourseData.courseData = makeCourse();
+    renderGps();
+
+    expect(screen.getByText("Test Course")).toBeInTheDocument();
+    expect(screen.getByText("18 trous — Par 72")).toBeInTheDocument();
+    expect(screen.getByText("Commencer la session")).toBeInTheDocument();
+  });
+
+  it("calls startSession on confirmation button click", async () => {
+    const user = userEvent.setup();
+    mockCourseData.courseData = makeCourse();
+    renderGps();
+
+    await user.click(screen.getByText("Commencer la session"));
+    expect(mockStartSession).toHaveBeenCalledWith("c1");
+  });
+
+  it("shows session error when startSession fails", () => {
+    mockCourseData.courseData = makeCourse();
+    mockSessionError = "Network error";
+    renderGps();
+
+    expect(screen.getByText("Network error")).toBeInTheDocument();
+  });
+
+  it("disables button and shows loading text when session is starting", () => {
+    mockCourseData.courseData = makeCourse();
+    mockSessionStatus = "starting";
+    renderGps();
+
+    const button = screen.getByText("Démarrage…");
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
+  });
+
+  it("displays distances when session is active and GPS is available", () => {
+    mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
     mockGeo.position = { lat: 44.885, lng: -0.564, accuracy: 5 };
 
@@ -119,8 +186,25 @@ describe("GpsScreen", () => {
     expect(screen.getByText("Arrière")).toBeInTheDocument();
   });
 
+  it("starts GPS watching when session becomes active", () => {
+    mockSessionStatus = "active";
+    mockCourseData.courseData = makeCourse();
+
+    renderGps();
+
+    expect(mockGeo.startWatching).toHaveBeenCalled();
+  });
+
+  it("does not start GPS when session is idle", () => {
+    mockCourseData.courseData = makeCourse();
+    renderGps();
+
+    expect(mockGeo.startWatching).not.toHaveBeenCalled();
+  });
+
   it("calls setManualHole on navigation", async () => {
     const user = userEvent.setup();
+    mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
     mockGeo.position = { lat: 44.885, lng: -0.564, accuracy: 5 };
 
@@ -145,6 +229,7 @@ describe("GpsScreen", () => {
   });
 
   it("shows GPS error message", () => {
+    mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
     mockGeo.error = "permission_denied";
 
@@ -153,6 +238,7 @@ describe("GpsScreen", () => {
   });
 
   it("displays GPS accuracy", () => {
+    mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
     mockGeo.position = { lat: 44.885, lng: -0.564, accuracy: 8 };
 

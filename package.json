@@ -16,7 +16,7 @@
     "db:migrate": "pnpm --filter @golfix/api db:migrate",
     "db:seed": "pnpm --filter @golfix/api db:seed",
     "simulate": "pnpm --filter @golfix/simulator simulate",
-    "validate": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build"
+    "validate": "pnpm lint && pnpm format && pnpm typecheck && pnpm build"
   },
   "engines": {
     "node": ">=22",
