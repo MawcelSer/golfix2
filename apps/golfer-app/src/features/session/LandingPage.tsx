@@ -4,6 +4,8 @@ import { apiClient, ApiError } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { GdprConsentModal } from "@/features/consent/GdprConsentModal";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
+import { InstallBanner } from "@/components/InstallBanner";
 import type { RoundSummaryResponse, CourseMatch } from "@golfix/shared";
 
 export function LandingPage() {
@@ -16,6 +18,16 @@ export function LandingPage() {
   const [locateMessage, setLocateMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showGdpr, setShowGdpr] = useState(false);
+
+  const { canInstall, promptInstall } = useInstallPrompt();
+  const [installDismissed, setInstallDismissed] = useState(
+    () => localStorage.getItem("golfix-install-dismissed") === "true",
+  );
+
+  function handleDismissInstall() {
+    setInstallDismissed(true);
+    localStorage.setItem("golfix-install-dismissed", "true");
+  }
 
   useEffect(() => {
     apiClient
@@ -88,6 +100,12 @@ export function LandingPage() {
       </button>
 
       {locateMessage && <p className="mt-4 text-center text-sm text-gold">{locateMessage}</p>}
+
+      {canInstall && !installDismissed && (
+        <div className="mt-4">
+          <InstallBanner onInstall={promptInstall} onDismiss={handleDismissInstall} />
+        </div>
+      )}
 
       {rounds.length > 0 && (
         <div className="mt-8">
