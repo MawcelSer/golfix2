@@ -76,6 +76,7 @@ export const sessions = pgTable(
     finishedAt: timestamp("finished_at", { withTimezone: true }),
     currentHole: smallint("current_hole"),
     status: sessionStatusEnum().default("active").notNull(),
+    positionSummary: jsonb("position_summary"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
