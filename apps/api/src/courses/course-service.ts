@@ -1,6 +1,6 @@
 import { eq, asc, inArray } from "drizzle-orm";
 import { db } from "../db/connection";
-import { courses, holes, hazards } from "../db/schema/index";
+import { courses, holes, hazards, courseRoles } from "../db/schema/index";
 import { isOnCourse, type CourseMatch } from "../spatial/spatial-service";
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -38,6 +38,34 @@ export interface CourseData {
   timezone: string;
   dataVersion: number;
   holes: HoleData[];
+}
+
+export interface ManagedCourse {
+  id: string;
+  name: string;
+  slug: string;
+  holesCount: number;
+  par: number;
+  role: string;
+}
+
+// ── getManagedCourses ────────────────────────────────────────────────
+
+export async function getManagedCourses(userId: string): Promise<ManagedCourse[]> {
+  const rows = await db
+    .select({
+      id: courses.id,
+      name: courses.name,
+      slug: courses.slug,
+      holesCount: courses.holesCount,
+      par: courses.par,
+      role: courseRoles.role,
+    })
+    .from(courseRoles)
+    .innerJoin(courses, eq(courseRoles.courseId, courses.id))
+    .where(eq(courseRoles.userId, userId));
+
+  return rows;
 }
 
 // ── locateCourse ────────────────────────────────────────────────────

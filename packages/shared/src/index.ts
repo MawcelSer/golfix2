@@ -34,6 +34,10 @@ export type {
   PositionBroadcast,
   SocketError,
   SocketEventName,
+  PaceStatus,
+  DashboardGroupUpdate,
+  DashboardAlertEvent,
+  DashboardBottleneckEvent,
 } from "./types/socket";
 
 export { SOCKET_EVENTS } from "./types/socket";

@@ -1,11 +1,22 @@
 import type { FastifyInstance } from "fastify";
 import { locateSchema, courseSlugParamSchema } from "./course-schemas";
-import { locateCourse, getCourseData } from "./course-service";
+import { locateCourse, getCourseData, getManagedCourses } from "./course-service";
+import { verifyToken } from "../middleware/auth-middleware";
 import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
 export async function courseRoutes(app: FastifyInstance): Promise<void> {
+  // ── GET /managed ────────────────────────────────────────────────────
+
+  app.get("/managed", {
+    onRequest: [verifyToken],
+    handler: async (request, reply) => {
+      const courses = await getManagedCourses(request.userId!);
+      return reply.status(200).send(courses);
+    },
+  });
+
   // ── POST /locate ──────────────────────────────────────────────────
 
   app.post("/locate", {
