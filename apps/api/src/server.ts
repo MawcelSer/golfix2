@@ -4,6 +4,9 @@ const PORT = Number(process.env.PORT ?? 3000);
 const HOST = process.env.HOST ?? "0.0.0.0";
 
 async function start() {
+  const { initSentry } = await import("./monitoring/sentry");
+  initSentry();
+
   const app = await buildApp();
 
   await app.listen({ port: PORT, host: HOST });

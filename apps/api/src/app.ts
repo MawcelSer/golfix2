@@ -4,6 +4,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import { sql } from "drizzle-orm";
 import { db } from "./db/connection";
+import { captureError } from "./monitoring/sentry";
 
 export async function buildApp() {
   const app = Fastify({
@@ -50,6 +51,10 @@ export async function buildApp() {
       err: error,
       statusCode,
     });
+
+    if (statusCode >= 500) {
+      captureError(error, { statusCode });
+    }
 
     reply.status(statusCode).send({
       error: statusCode >= 500 ? "Internal Server Error" : error.message,
