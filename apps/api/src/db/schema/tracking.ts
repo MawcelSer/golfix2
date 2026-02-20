@@ -67,9 +67,7 @@ export const sessions = pgTable(
   "sessions",
   {
     id: uuid().primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id),
+    userId: uuid("user_id").references(() => users.id), // Nullable for GDPR anonymization
     courseId: uuid("course_id")
       .notNull()
       .references(() => courses.id),
