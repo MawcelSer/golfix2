@@ -19,7 +19,9 @@ export async function getCachedCourse(slug: string): Promise<CourseData | null> 
 
     const age = Date.now() - entry.cachedAt;
     if (age > CACHE_TTL_MS) {
-      await del(cacheKey(slug)).catch((err) => console.warn("[course-cache] Failed to delete expired entry:", err));
+      await del(cacheKey(slug)).catch((err) =>
+        console.warn("[course-cache] Failed to delete expired entry:", err),
+      );
       return null;
     }
 

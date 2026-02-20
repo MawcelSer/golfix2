@@ -10,10 +10,7 @@ test.describe("Session flow", () => {
     await expect(page).toHaveURL(/\/gps/);
 
     // Navigate to GPS with course param
-    await page.evaluate(() => {
-      window.history.pushState({}, "", "/gps?course=royal-golf-marrakech");
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    await page.goto("/gps?course=royal-golf-marrakech");
 
     // Wait for course data to load and session confirmation to appear
     await expect(page.getByText("Royal Golf Marrakech")).toBeVisible({ timeout: 5000 });
@@ -68,11 +65,11 @@ test.describe("Session flow", () => {
       timeout: 5000,
     });
 
-    // Accept the confirm dialog
-    page.on("dialog", (dialog) => dialog.accept());
-
-    // Click end session
+    // Click end session — opens custom ConfirmDialog
     await page.getByRole("button", { name: "Terminer la partie" }).click();
+
+    // Accept the custom confirm dialog
+    await page.getByRole("button", { name: "Confirmer" }).click();
 
     // Should navigate to landing page
     await expect(page).toHaveURL("/");

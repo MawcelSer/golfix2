@@ -10,9 +10,17 @@ function vsParLabel(vsPar: number): string {
 }
 
 function vsParColor(vsPar: number): string {
-  if (vsPar < 0) return "text-green-light";
-  if (vsPar > 0) return "text-gold";
-  return "text-cream/70";
+  if (vsPar <= -1) return "text-green-light";
+  if (vsPar === 0) return "text-cream/70";
+  if (vsPar === 1) return "text-gold";
+  return "text-sand";
+}
+
+function scoreColor(vsPar: number): string {
+  if (vsPar <= -1) return "text-green-light";
+  if (vsPar === 0) return "text-cream";
+  if (vsPar === 1) return "text-gold";
+  return "text-sand";
 }
 
 export function HoleBreakdown({ holeDetails }: HoleBreakdownProps) {
@@ -37,11 +45,16 @@ export function HoleBreakdown({ holeDetails }: HoleBreakdownProps) {
           </tr>
         </thead>
         <tbody>
-          {holeDetails.map((h) => (
-            <tr key={h.holeNumber} className="border-b border-cream/5">
+          {holeDetails.map((h, i) => (
+            <tr
+              key={h.holeNumber}
+              className={`border-b border-cream/5 ${i % 2 === 0 ? "bg-cream/3" : ""}`}
+            >
               <td className="py-2 text-cream">{h.holeNumber}</td>
               <td className="py-2 text-center text-cream/60">{h.par}</td>
-              <td className="py-2 text-center font-mono font-medium text-cream">{h.strokes}</td>
+              <td className={`py-2 text-center font-mono font-medium ${scoreColor(h.vsPar)}`}>
+                {h.strokes}
+              </td>
               <td className={`py-2 text-center font-mono font-medium ${vsParColor(h.vsPar)}`}>
                 {vsParLabel(h.vsPar)}
               </td>

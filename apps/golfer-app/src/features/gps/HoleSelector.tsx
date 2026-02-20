@@ -24,7 +24,15 @@ export function HoleSelector({
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-cream/10 text-cream disabled:opacity-30"
         aria-label="Trou précédent"
       >
-        ◀
+        <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true">
+          <path
+            d="M10 1L3 7l7 6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
 
       <div className="text-center">
@@ -45,7 +53,15 @@ export function HoleSelector({
         className="flex h-9 w-9 items-center justify-center rounded-xl bg-cream/10 text-cream disabled:opacity-30"
         aria-label="Trou suivant"
       >
-        ▶
+        <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true">
+          <path
+            d="M2 1l7 6-7 6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </div>
   );

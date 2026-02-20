@@ -66,8 +66,8 @@ export function ProfileScreen() {
 
       {/* User info with avatar */}
       <div className="flex items-center gap-4 rounded-2xl bg-cream/5 px-4 py-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-mid">
-          <span className="font-display text-lg text-cream">{getInitial(user?.displayName)}</span>
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-mid ring-2 ring-gold/30">
+          <span className="font-display text-xl text-cream">{getInitial(user?.displayName)}</span>
         </div>
         <div>
           <p className="text-lg font-medium text-cream">{user?.displayName ?? "\u2014"}</p>
