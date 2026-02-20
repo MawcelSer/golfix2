@@ -143,7 +143,7 @@ export function GpsScreen() {
   const playerPos = position ? { lat: position.lat, lng: position.lng } : null;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Hole header with navigation */}
       <HoleSelector
         currentHole={detectedHole}
@@ -155,7 +155,7 @@ export function GpsScreen() {
       />
 
       {/* Hole illustration */}
-      <div className="flex-1 px-3 py-2">
+      <div className="min-h-0 flex-1 px-3 py-2">
         <HoleIllustration
           holeNumber={detectedHole}
           par={hole?.par ?? 4}

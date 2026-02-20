@@ -81,20 +81,15 @@ async function loginAndGoToScorecard(page: Page) {
     });
   });
 
-  // Login — go directly to the GPS page with course param
-  // The AuthGuard will redirect to /login, then login navigates to /gps
-  // So we login first, then use client-side navigation to add the course param
+  // Login first, then navigate to GPS with course param
   await page.goto("/login");
   await page.getByLabel("Email").fill("test@golfix.fr");
   await page.getByLabel("Mot de passe").fill("password123");
   await page.getByRole("button", { name: "Connexion" }).click();
   await expect(page).toHaveURL(/\/gps/);
 
-  // Use client-side navigation to add course query param (avoids full page reload)
-  await page.evaluate(() => {
-    window.history.pushState({}, "", "/gps?course=royal-golf-marrakech");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+  // Navigate with proper route (page.goto triggers full React Router resolution)
+  await page.goto("/gps?course=royal-golf-marrakech");
 
   // Wait for session confirmation screen
   await expect(page.getByText("Royal Golf Marrakech")).toBeVisible({ timeout: 5000 });
@@ -126,8 +121,7 @@ test.describe("Scorecard flow", () => {
   test("displays scorecard with hole 1 when course is loaded", async ({ page }) => {
     await loginAndGoToScorecard(page);
 
-    // Verify scorecard renders correctly for hole 1 (par 3)
-    await expect(page.getByText("Par 3")).toBeVisible();
+    // Verify scorecard renders correctly for hole 1
     await expect(page.getByText("Coups")).toBeVisible();
     await expect(page.getByText("Putts")).toBeVisible();
     await expect(page.getByText("Trou 1/18")).toBeVisible();

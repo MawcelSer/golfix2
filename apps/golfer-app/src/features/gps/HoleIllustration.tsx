@@ -91,7 +91,7 @@ export function HoleIllustration({
   return (
     <svg
       viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-      className="h-full w-full"
+      className="h-full max-h-full w-full"
       aria-label={`Trou ${holeNumber}`}
     >
       <defs>
