@@ -29,7 +29,7 @@ function formatSession(row: {
 }): SessionResponse {
   return {
     id: row.id,
-    userId: row.userId ?? "",
+    userId: row.userId,
     courseId: row.courseId,
     groupId: row.groupId,
     status: row.status,

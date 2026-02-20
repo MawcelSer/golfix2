@@ -120,7 +120,7 @@ export async function exportUserData(userId: string): Promise<GdprExportData> {
 }
 
 export async function deleteUserAccount(userId: string, password?: string): Promise<void> {
-  // 1. Verify user exists and check password
+  // 1. Verify user exists and check password (outside transaction — read-only + bcrypt)
   const [user] = await db
     .select({
       id: users.id,
@@ -137,31 +137,34 @@ export async function deleteUserAccount(userId: string, password?: string): Prom
     if (!valid) throw new InvalidPasswordError();
   }
 
-  // 2. Delete scores (via rounds)
-  const userRounds = await db
-    .select({ id: rounds.id })
-    .from(rounds)
-    .where(eq(rounds.userId, userId));
-  const roundIds = userRounds.map((r) => r.id);
-  if (roundIds.length > 0) {
-    await db.delete(scores).where(inArray(scores.roundId, roundIds));
-  }
+  // 2. Atomic deletion cascade inside a transaction
+  await db.transaction(async (tx) => {
+    // Delete scores (via rounds)
+    const userRounds = await tx
+      .select({ id: rounds.id })
+      .from(rounds)
+      .where(eq(rounds.userId, userId));
+    const roundIds = userRounds.map((r) => r.id);
+    if (roundIds.length > 0) {
+      await tx.delete(scores).where(inArray(scores.roundId, roundIds));
+    }
 
-  // 3. Delete rounds
-  await db.delete(rounds).where(eq(rounds.userId, userId));
+    // Delete rounds
+    await tx.delete(rounds).where(eq(rounds.userId, userId));
 
-  // 4. Anonymize sessions (keep positions for analytics)
-  await db
-    .update(sessions)
-    .set({ userId: sql`NULL` })
-    .where(eq(sessions.userId, userId));
+    // Anonymize sessions (keep positions for analytics)
+    await tx
+      .update(sessions)
+      .set({ userId: sql`NULL` })
+      .where(eq(sessions.userId, userId));
 
-  // 5. Delete refresh tokens
-  await db.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
+    // Delete refresh tokens
+    await tx.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
 
-  // 6. Delete course roles
-  await db.delete(courseRoles).where(eq(courseRoles.userId, userId));
+    // Delete course roles
+    await tx.delete(courseRoles).where(eq(courseRoles.userId, userId));
 
-  // 7. Delete user
-  await db.delete(users).where(eq(users.id, userId));
+    // Delete user
+    await tx.delete(users).where(eq(users.id, userId));
+  });
 }

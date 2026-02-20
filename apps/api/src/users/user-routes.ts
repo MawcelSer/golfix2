@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import { updatePrefsSchema, deleteAccountSchema } from "./user-schemas";
 import { getUserPreferences, updateUserPreferences, UserNotFoundError } from "./user-service";
 import {
@@ -9,10 +8,7 @@ import {
   InvalidPasswordError,
 } from "./gdpr-service";
 import { verifyToken } from "../middleware/auth-middleware";
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 export async function userRoutes(app: FastifyInstance): Promise<void> {
   app.addHook("onRequest", verifyToken);

@@ -1,13 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import { locateSchema, courseSlugParamSchema } from "./course-schemas";
 import { locateCourse, getCourseData } from "./course-service";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 

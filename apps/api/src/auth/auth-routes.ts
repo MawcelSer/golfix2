@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import { registerSchema, loginSchema, anonymousSchema, refreshSchema } from "./auth-schemas";
 import {
   registerUser,
@@ -9,12 +8,7 @@ import {
   revokeRefreshToken,
   AuthError,
 } from "./auth-service";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 function isDuplicateEmail(error: unknown): boolean {
   if (!(error instanceof Error)) return false;

@@ -3,6 +3,11 @@ import { db } from "../db/connection";
 import { sessions, positions } from "../db/schema/tracking";
 import { eq, sql } from "drizzle-orm";
 
+interface Logger {
+  info(obj: Record<string, unknown>, msg: string): void;
+  error(obj: Record<string, unknown>, msg: string): void;
+}
+
 const RETENTION_MONTHS = 12;
 
 interface RetentionResult {
@@ -54,10 +59,7 @@ export async function processRetention(): Promise<RetentionResult> {
       };
 
       // Store summary on session
-      await db
-        .update(sessions)
-        .set({ positionSummary })
-        .where(eq(sessions.id, row.session_id));
+      await db.update(sessions).set({ positionSummary }).where(eq(sessions.id, row.session_id));
 
       // Delete raw positions
       await db.delete(positions).where(eq(positions.sessionId, row.session_id));
@@ -70,18 +72,22 @@ export async function processRetention(): Promise<RetentionResult> {
   return { sessionsProcessed, positionsDeleted };
 }
 
-export function startRetentionCron(): void {
+export function startRetentionCron(logger: Logger): void {
   const schedule = process.env.RETENTION_CRON ?? "0 3 * * *"; // daily at 3 AM
   cron.schedule(schedule, async () => {
     try {
       const result = await processRetention();
       if (result.sessionsProcessed > 0) {
-        console.log(
-          `[retention] Processed ${result.sessionsProcessed} sessions, deleted ${result.positionsDeleted} positions`,
+        logger.info(
+          {
+            sessionsProcessed: result.sessionsProcessed,
+            positionsDeleted: result.positionsDeleted,
+          },
+          "Retention job completed",
         );
       }
     } catch (err) {
-      console.error("[retention] Cron job failed:", err);
+      logger.error({ err }, "Retention cron job failed");
     }
   });
 }

@@ -36,16 +36,12 @@ export async function updateCourseSettings(
   courseId: string,
   update: { paceTargetMinutes?: number; teeIntervalMinutes?: number; timezone?: string },
 ) {
-  const [updated] = await db
-    .update(courses)
-    .set(update)
-    .where(eq(courses.id, courseId))
-    .returning({
-      id: courses.id,
-      paceTargetMinutes: courses.paceTargetMinutes,
-      teeIntervalMinutes: courses.teeIntervalMinutes,
-      timezone: courses.timezone,
-    });
+  const [updated] = await db.update(courses).set(update).where(eq(courses.id, courseId)).returning({
+    id: courses.id,
+    paceTargetMinutes: courses.paceTargetMinutes,
+    teeIntervalMinutes: courses.teeIntervalMinutes,
+    timezone: courses.timezone,
+  });
   if (!updated) throw new CourseNotFoundError(courseId);
   return updated;
 }
@@ -70,10 +66,7 @@ export async function listCourseRoles(courseId: string) {
 
 export async function assignCourseRole(courseId: string, email: string, role: string) {
   // Find user by email
-  const [user] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, email));
+  const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
   if (!user) throw new UserNotFoundByEmailError(email);
 
   // Check for existing role
@@ -97,19 +90,24 @@ export async function assignCourseRole(courseId: string, email: string, role: st
 }
 
 export async function removeCourseRole(roleId: string, courseId: string) {
-  // Check if this is the last owner
-  const [role] = await db
-    .select({ role: courseRoles.role })
-    .from(courseRoles)
-    .where(eq(courseRoles.id, roleId));
-
-  if (role?.role === "owner") {
-    const owners = await db
-      .select({ id: courseRoles.id })
+  await db.transaction(async (tx) => {
+    // Lock the role row to prevent concurrent modifications
+    const [role] = await tx
+      .select({ role: courseRoles.role })
       .from(courseRoles)
-      .where(and(eq(courseRoles.courseId, courseId), eq(courseRoles.role, "owner")));
-    if (owners.length <= 1) throw new LastOwnerError();
-  }
+      .where(eq(courseRoles.id, roleId));
 
-  await db.delete(courseRoles).where(eq(courseRoles.id, roleId));
+    if (!role) return; // Already deleted
+
+    if (role.role === "owner") {
+      // Count owners with a locked read to prevent TOCTOU
+      const owners = await tx
+        .select({ id: courseRoles.id })
+        .from(courseRoles)
+        .where(and(eq(courseRoles.courseId, courseId), eq(courseRoles.role, "owner")));
+      if (owners.length <= 1) throw new LastOwnerError();
+    }
+
+    await tx.delete(courseRoles).where(eq(courseRoles.id, roleId));
+  });
 }

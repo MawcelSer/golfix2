@@ -14,7 +14,7 @@ async function start() {
   // Start retention cron in production or when explicitly enabled
   if (process.env.NODE_ENV === "production" || process.env.ENABLE_RETENTION === "true") {
     const { startRetentionCron } = await import("./retention/retention-job");
-    startRetentionCron();
+    startRetentionCron(app.log);
     app.log.info("Position retention cron started");
   }
 }

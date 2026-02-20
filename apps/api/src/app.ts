@@ -37,7 +37,9 @@ export async function buildApp() {
   });
 
   await app.register(cors, {
-    origin: process.env.CORS_ORIGIN ?? ["https://localhost:5173", "https://localhost:5174"],
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+      : ["https://localhost:5173", "https://localhost:5174"],
     credentials: true,
   });
 
@@ -78,12 +80,14 @@ export async function buildApp() {
           dbStatus = "disconnected";
         }
 
+        const isProd = process.env.NODE_ENV === "production";
         return {
           status: dbStatus === "connected" ? "ok" : "degraded",
           timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: process.env.npm_package_version ?? "0.0.0",
           db: dbStatus,
+          ...(isProd
+            ? {}
+            : { uptime: process.uptime(), version: process.env.npm_package_version ?? "0.0.0" }),
         };
       });
 

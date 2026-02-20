@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import {
   createTeeTimeSchema,
   updateTeeTimeSchema,
@@ -16,12 +15,7 @@ import {
   TeeTimeError,
 } from "./tee-time-service";
 import { verifyToken, requireRole } from "../middleware/auth-middleware";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
@@ -36,7 +30,9 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = courseIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       const date = request.query.date ?? new Date().toISOString().split("T")[0]!;
@@ -65,7 +61,9 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = courseIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       const parsed = createTeeTimeSchema.safeParse(request.body);
@@ -93,7 +91,9 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       try {
@@ -116,7 +116,9 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       const parsed = updateTeeTimeSchema.safeParse(request.body);
@@ -148,7 +150,9 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       try {

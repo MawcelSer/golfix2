@@ -1,14 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import { startSessionSchema, finishSessionSchema, sessionIdParamSchema } from "./session-schemas";
 import { startSession, finishSession, getSession, SessionError } from "./session-service";
 import { verifyToken } from "../middleware/auth-middleware";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
@@ -45,7 +39,9 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = sessionIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       const parsed = finishSessionSchema.safeParse(request.body);
@@ -54,7 +50,11 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
       }
 
       try {
-        const result = await finishSession(paramsParsed.data.id, request.userId!, parsed.data.status);
+        const result = await finishSession(
+          paramsParsed.data.id,
+          request.userId!,
+          parsed.data.status,
+        );
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof SessionError) {
@@ -73,7 +73,9 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
     handler: async (request, reply) => {
       const paramsParsed = sessionIdParamSchema.safeParse(request.params);
       if (!paramsParsed.success) {
-        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
       }
 
       try {

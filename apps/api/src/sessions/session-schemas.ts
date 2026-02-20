@@ -29,7 +29,7 @@ export interface StartSessionResponse {
 
 export interface SessionResponse {
   id: string;
-  userId: string;
+  userId: string | null;
   courseId: string;
   groupId: string | null;
   status: string;
