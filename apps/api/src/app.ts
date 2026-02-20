@@ -115,6 +115,12 @@ export async function buildApp() {
 
       const { courseSettingsRoutes } = await import("./courses/course-settings-routes");
       await api.register(courseSettingsRoutes, { prefix: "/courses/:courseId" });
+
+      const { reminderRoutes } = await import("./pace/reminder-routes");
+      await api.register(reminderRoutes, { prefix: "/courses/:courseId/reminders" });
+
+      const { reportRoutes } = await import("./reports/report-routes");
+      await api.register(reportRoutes, { prefix: "/courses/:courseId/reports" });
     },
     { prefix: "/api/v1" },
   );

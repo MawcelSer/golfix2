@@ -6,6 +6,7 @@ import { UnauthorizedScreen } from "@/features/auth/UnauthorizedScreen";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { CourseListScreen } from "@/features/courses/CourseListScreen";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { DailyReportScreen } from "@/features/reports/DailyReportScreen";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginScreen /> },
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
             children: [
               { path: "/", element: <CourseListScreen /> },
               { path: "/course/:courseId", element: <DashboardPage /> },
+              { path: "/reports/:courseId", element: <DailyReportScreen /> },
             ],
           },
         ],

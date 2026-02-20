@@ -25,6 +25,7 @@ function sortGroups(groups: DashboardGroupUpdate[], key: SortKey): DashboardGrou
 
 interface GroupListPanelProps {
   groups: DashboardGroupUpdate[];
+  onReminder?: (group: DashboardGroupUpdate) => void;
 }
 
 const COLUMNS: { key: SortKey; label: string }[] = [
@@ -34,7 +35,7 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: "paceFactor", label: "Facteur" },
 ];
 
-export function GroupListPanel({ groups }: GroupListPanelProps) {
+export function GroupListPanel({ groups, onReminder }: GroupListPanelProps) {
   const [sortKey, setSortKey] = useState<SortKey>("groupNumber");
   const sorted = sortGroups(groups, sortKey);
 
@@ -65,11 +66,12 @@ export function GroupListPanel({ groups }: GroupListPanelProps) {
                 <th className="px-3 py-2 text-left text-xs font-medium text-cream/50">
                   Fin estimée
                 </th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-cream/50" />
               </tr>
             </thead>
             <tbody>
               {sorted.map((group) => (
-                <GroupRow key={group.groupId} group={group} />
+                <GroupRow key={group.groupId} group={group} onReminder={onReminder} />
               ))}
             </tbody>
           </table>

@@ -1,11 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import type { DashboardGroupUpdate } from "@golfix/shared";
 import { useDashboardStore } from "@/stores/dashboard-store";
 import { useDashboardSocket } from "@/hooks/use-dashboard-socket";
 import { apiClient, ApiError } from "@/services/api-client";
 import { CourseMap } from "@/features/map/CourseMap";
 import { GroupListPanel } from "@/features/groups/GroupListPanel";
 import { AlertFeedPanel } from "@/features/alerts/AlertFeedPanel";
+import { SendReminderDialog } from "@/features/groups/SendReminderDialog";
+import { ToastContainer } from "@/components/Toast";
 import type { ActiveCourse } from "@/stores/dashboard-store";
 
 export function DashboardPage() {
@@ -17,6 +20,8 @@ export function DashboardPage() {
   const courseLoading = useDashboardStore((s) => s.courseLoading);
   const setActiveCourse = useDashboardStore((s) => s.setActiveCourse);
   const setCourseLoading = useDashboardStore((s) => s.setCourseLoading);
+
+  const [reminderTarget, setReminderTarget] = useState<DashboardGroupUpdate | null>(null);
 
   // Connect WebSocket for live updates
   useDashboardSocket(courseId);
@@ -96,13 +101,25 @@ export function DashboardPage() {
         {/* Side panels (40%) */}
         <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
           <div className="flex-1 overflow-auto">
-            <GroupListPanel groups={groups} />
+            <GroupListPanel groups={groups} onReminder={setReminderTarget} />
           </div>
           <div className="flex-1 overflow-auto">
             <AlertFeedPanel alerts={alerts} />
           </div>
         </div>
       </div>
+
+      {/* Reminder dialog */}
+      {reminderTarget && courseId && (
+        <SendReminderDialog
+          courseId={courseId}
+          groupId={reminderTarget.groupId}
+          groupNumber={reminderTarget.groupNumber}
+          onClose={() => setReminderTarget(null)}
+        />
+      )}
+
+      <ToastContainer />
     </div>
   );
 }
