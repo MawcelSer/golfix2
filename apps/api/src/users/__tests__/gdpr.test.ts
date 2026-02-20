@@ -24,9 +24,7 @@ describe("GDPR export", () => {
   beforeAll(async () => {
     app = await buildApp();
     // Get first course from seed data
-    const [course] = await db.execute<{ id: string }>(
-      /*sql*/ `SELECT id FROM courses LIMIT 1`,
-    );
+    const [course] = await db.execute<{ id: string }>(/*sql*/ `SELECT id FROM courses LIMIT 1`);
     if (!course) throw new Error("No seed course found — run pnpm db:seed");
     courseId = course.id;
   });
@@ -143,9 +141,7 @@ describe("GDPR deletion", () => {
 
   beforeAll(async () => {
     app = await buildApp();
-    const [course] = await db.execute<{ id: string }>(
-      /*sql*/ `SELECT id FROM courses LIMIT 1`,
-    );
+    const [course] = await db.execute<{ id: string }>(/*sql*/ `SELECT id FROM courses LIMIT 1`);
     if (!course) throw new Error("No seed course found — run pnpm db:seed");
     courseId = course.id;
   });

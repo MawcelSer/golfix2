@@ -11,9 +11,7 @@ describe("retention job", () => {
 
   beforeAll(async () => {
     // Get seed course
-    const [course] = await db.execute<{ id: string }>(
-      /*sql*/ `SELECT id FROM courses LIMIT 1`,
-    );
+    const [course] = await db.execute<{ id: string }>(/*sql*/ `SELECT id FROM courses LIMIT 1`);
     if (!course) throw new Error("No seed course — run pnpm db:seed");
     courseId = course.id;
 

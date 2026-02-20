@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @golfix/api --filter @golfix/golfer-app -r --parallel dev",
+    "dev": "pnpm --filter @golfix/shared build && pnpm --filter @golfix/api --filter @golfix/golfer-app -r --parallel dev",
     "dev:api": "pnpm --filter @golfix/api dev",
     "dev:dashboard": "pnpm --filter @golfix/dashboard dev",
     "dev:golfer": "pnpm --filter @golfix/golfer-app dev",
