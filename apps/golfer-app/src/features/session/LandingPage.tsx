@@ -86,12 +86,15 @@ export function LandingPage() {
     locateCourse();
   }, [gdprConsent, locateCourse]);
 
-  const handleGdprClose = useCallback(() => {
-    setShowGdpr(false);
-    if (useAuthStore.getState().gdprConsent) {
-      locateCourse();
-    }
-  }, [locateCourse]);
+  const handleGdprClose = useCallback(
+    (accepted: boolean) => {
+      setShowGdpr(false);
+      if (accepted) {
+        locateCourse();
+      }
+    },
+    [locateCourse],
+  );
 
   return (
     <div className="flex min-h-dvh flex-col bg-pine px-6 pt-12">

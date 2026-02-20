@@ -21,25 +21,42 @@ const SVG_HEIGHT = 400;
 const TEE_Y = 360;
 const GREEN_Y = 60;
 const CENTER_X = 100;
-const LATERAL_SCALE = 800;
+const LATERAL_SCALE = 0.3;
+
+interface MetersXY {
+  dx: number;
+  dy: number;
+}
+
+export function toMeters(origin: LatLng, point: LatLng): MetersXY {
+  const dy = (point.lat - origin.lat) * 111320;
+  const dx = (point.lng - origin.lng) * 111320 * Math.cos(origin.lat * (Math.PI / 180));
+  return { dx, dy };
+}
 
 function toSvgY(tee: LatLng, green: LatLng, point: LatLng): number {
-  const totalDist = Math.sqrt((green.lat - tee.lat) ** 2 + (green.lng - tee.lng) ** 2);
+  const totalM = toMeters(tee, green);
+  const totalDist = Math.sqrt(totalM.dx ** 2 + totalM.dy ** 2);
   if (totalDist === 0) return TEE_Y;
-  const pointDist = Math.sqrt((point.lat - tee.lat) ** 2 + (point.lng - tee.lng) ** 2);
+  const pointM = toMeters(tee, point);
+  const pointDist = Math.sqrt(pointM.dx ** 2 + pointM.dy ** 2);
   const ratio = Math.min(1, Math.max(0, pointDist / totalDist));
   return TEE_Y - ratio * (TEE_Y - GREEN_Y);
 }
 
 function toSvgX(tee: LatLng, green: LatLng, point: LatLng): number {
-  const dx = green.lng - tee.lng;
-  const dy = green.lat - tee.lat;
-  const len = Math.sqrt(dx * dx + dy * dy);
+  const gm = toMeters(tee, green);
+  const len = Math.sqrt(gm.dx ** 2 + gm.dy ** 2);
   if (len === 0) return CENTER_X;
-  const px = point.lng - tee.lng;
-  const py = point.lat - tee.lat;
-  const cross = (-dy * px + dx * py) / len;
+  const pm = toMeters(tee, point);
+  const cross = (-gm.dy * pm.dx + gm.dx * pm.dy) / len;
   return CENTER_X + cross * LATERAL_SCALE;
+}
+
+type HazardWithCarryPoint = HazardData & { carryPoint: { x: number; y: number } };
+
+function hasCarryPoint(h: HazardData): h is HazardWithCarryPoint {
+  return h.carryPoint != null;
 }
 
 export function HoleIllustration({
@@ -68,7 +85,6 @@ export function HoleIllustration({
   const playerSvgY = playerPosition ? toSvgY(teePosition, greenCenter, playerPosition) : null;
   const playerSvgX = playerPosition ? toSvgX(teePosition, greenCenter, playerPosition) : null;
 
-  // Scope gradient IDs to avoid collision if multiple instances render
   const bgId = `bg-grad-${holeNumber}`;
   const glowId = `green-glow-${holeNumber}`;
 
@@ -129,24 +145,22 @@ export function HoleIllustration({
       />
 
       {/* Hazards */}
-      {hazards
-        .filter((h) => h.carryPoint != null)
-        .map((h, i) => {
-          const pos = { lat: h.carryPoint!.y, lng: h.carryPoint!.x };
-          const hx = toSvgX(teePosition, greenCenter, pos);
-          const hy = toSvgY(teePosition, greenCenter, pos);
-          return (
-            <ellipse
-              key={i}
-              cx={hx}
-              cy={hy}
-              rx={10}
-              ry={6}
-              fill={h.type === "bunker" ? "#d4b968" : "#4a9fd4"}
-              opacity={0.6}
-            />
-          );
-        })}
+      {hazards.filter(hasCarryPoint).map((h) => {
+        const pos = { lat: h.carryPoint.y, lng: h.carryPoint.x };
+        const hx = toSvgX(teePosition, greenCenter, pos);
+        const hy = toSvgY(teePosition, greenCenter, pos);
+        return (
+          <ellipse
+            key={`hazard-${h.type}-${h.carryPoint.x}-${h.carryPoint.y}`}
+            cx={hx}
+            cy={hy}
+            rx={10}
+            ry={6}
+            fill={h.type === "bunker" ? "#d4b968" : "#4a9fd4"}
+            opacity={0.6}
+          />
+        );
+      })}
 
       {/* Player + dashed line to green */}
       {playerSvgX != null && playerSvgY != null && (
