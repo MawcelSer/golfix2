@@ -13,7 +13,21 @@ export async function buildApp() {
 
   // ── Security ───────────────────────────────────────────────────
 
-  await app.register(helmet);
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'", "wss:", "https:"],
+        workerSrc: ["'self'", "blob:"],
+        manifestSrc: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Required for PWA service worker
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  });
 
   await app.register(cors, {
     origin: process.env.CORS_ORIGIN ?? ["https://localhost:5173", "https://localhost:5174"],
