@@ -106,7 +106,10 @@ export function GpsScreen() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
         <p className="text-cream/70">Session terminée</p>
-        <a href="/summary" className="rounded-xl bg-green-mid px-6 py-3 text-sm font-medium text-cream">
+        <a
+          href="/summary"
+          className="rounded-xl bg-green-mid px-6 py-3 text-sm font-medium text-cream"
+        >
           Voir le résumé
         </a>
       </div>

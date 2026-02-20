@@ -95,8 +95,7 @@ describe("token refresh interceptor", () => {
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: () =>
-            Promise.resolve({ accessToken: "new-at", refreshToken: "new-rt" }),
+          json: () => Promise.resolve({ accessToken: "new-at", refreshToken: "new-rt" }),
         });
       }
       // Third call: retried original request
@@ -223,10 +222,7 @@ describe("token refresh interceptor", () => {
     );
 
     // Fire two requests concurrently
-    const [r1, r2] = await Promise.all([
-      apiClient.get("/courses"),
-      apiClient.get("/sessions"),
-    ]);
+    const [r1, r2] = await Promise.all([apiClient.get("/courses"), apiClient.get("/sessions")]);
 
     expect(r1).toEqual({ data: "ok" });
     expect(r2).toEqual({ data: "ok" });
