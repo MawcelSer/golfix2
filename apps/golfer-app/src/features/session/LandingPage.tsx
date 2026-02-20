@@ -18,6 +18,7 @@ export function LandingPage() {
   const [locateMessage, setLocateMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showGdpr, setShowGdpr] = useState(false);
+  const [waitingForGps, setWaitingForGps] = useState(false);
 
   const { canInstall, promptInstall } = useInstallPrompt();
   const [installDismissed, setInstallDismissed] = useState(
@@ -52,11 +53,13 @@ export function LandingPage() {
   const locateCourse = useCallback(async () => {
     if (!position) {
       startWatching();
+      setWaitingForGps(true);
       setLocateMessage("Acquisition GPS en cours…");
       setLoading(false);
       return;
     }
 
+    setWaitingForGps(false);
     setLoading(true);
     setLocateMessage(null);
 
@@ -77,6 +80,13 @@ export function LandingPage() {
       setLoading(false);
     }
   }, [position, startWatching, navigate]);
+
+  // Auto-locate when GPS position arrives after user clicked "Démarrer"
+  useEffect(() => {
+    if (waitingForGps && position) {
+      locateCourse();
+    }
+  }, [waitingForGps, position, locateCourse]);
 
   const handleStart = useCallback(() => {
     if (!gdprConsent) {
