@@ -89,9 +89,25 @@ export function ScoreEntry({ holeNumber, par, holesCount, onAdvance }: ScoreEntr
 
   if (!score) return null;
 
+  const vsPar = score.strokes - par;
+
+  function scoreColorClass(vs: number): string {
+    if (vs <= -1) return "text-green-light";
+    if (vs === 0) return "text-cream";
+    if (vs === 1) return "text-gold";
+    return "text-sand";
+  }
+
   return (
     <div className="flex flex-col gap-4 px-4">
-      <div className="text-center font-display text-sm text-cream/50">Par {par}</div>
+      <div className="text-center font-display text-sm text-cream/50">
+        Par {par}
+        {score.strokes > 0 && (
+          <span className={`ml-2 font-mono font-medium ${scoreColorClass(vsPar)}`}>
+            {vsPar === 0 ? "E" : vsPar > 0 ? `+${vsPar}` : vsPar}
+          </span>
+        )}
+      </div>
 
       <StrokeCounter
         label="Coups"

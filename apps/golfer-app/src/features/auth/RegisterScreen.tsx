@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { apiClient } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AuthResponse } from "@golfix/shared";
+
+const registerSchema = z.object({
+  displayName: z.string().min(1, "Le nom est requis"),
+  email: z.string().email("Email invalide"),
+  password: z.string().min(8, "8 caractères minimum"),
+});
 
 export function RegisterScreen() {
   const [displayName, setDisplayName] = useState("");
@@ -16,6 +23,13 @@ export function RegisterScreen() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const result = registerSchema.safeParse({ displayName, email, password });
+    if (!result.success) {
+      setError(result.error.errors[0]!.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -25,7 +39,7 @@ export function RegisterScreen() {
         password,
       });
       setAuth(response);
-      navigate("/gps");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur d'inscription");
     } finally {
@@ -36,7 +50,7 @@ export function RegisterScreen() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-pine px-6">
       <img src="/icons/app-logo.png" alt="Golfix" className="mb-8 h-16" />
-      <h1 className="mb-6 font-display text-2xl text-cream">Créer un compte</h1>
+      <h1 className="mb-6 font-display text-3xl text-cream">Créer un compte</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-cream">

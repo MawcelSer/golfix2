@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCourseStore } from "@/stores/course-store";
 import { useRoundStore } from "@/stores/round-store";
@@ -13,15 +13,13 @@ export function RoundSummaryScreen() {
   const scores = useRoundStore((s) => s.scores);
   const roundReset = useRoundStore((s) => s.reset);
   const sessionReset = useSessionStore((s) => s.reset);
-  const didRedirect = useRef(false);
 
-  // Redirect if no data — runs only on mount
+  // Redirect if no data
   useEffect(() => {
-    if (scores.size === 0 && !didRedirect.current) {
-      didRedirect.current = true;
+    if (scores.size === 0) {
       navigate("/", { replace: true });
     }
-  }, [scores, navigate]);
+  }, []);
 
   const handleGoHome = useCallback(() => {
     roundReset();
@@ -30,13 +28,21 @@ export function RoundSummaryScreen() {
   }, [roundReset, sessionReset, navigate]);
 
   if (scores.size === 0) return null;
-  if (!courseData) return null;
+
+  // Show loading state while course data loads
+  if (!courseData) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-cream/70">Chargement du parcours…</p>
+      </div>
+    );
+  }
 
   const stats = computeRoundStats(scores, courseData.holes);
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 pb-4 pt-6">
-      <h1 className="text-center font-display text-xl text-cream">Résumé de la partie</h1>
+      <h1 className="text-center font-display text-2xl text-cream">Résumé de la partie</h1>
 
       <StatsSummary stats={stats} />
 

@@ -18,6 +18,24 @@
   --font-mono: "DM Mono", ui-monospace, monospace;
 }
 
+/* Focus visible ring */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Button & link transitions */
+button,
+a {
+  transition:
+    transform 0.1s ease,
+    opacity 0.15s ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
 /* GPS player dot pulse animation */
 @keyframes gps-pulse {
   0%,

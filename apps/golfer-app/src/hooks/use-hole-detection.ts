@@ -32,6 +32,7 @@ export function useHoleDetection(
   const [detectedHole, setDetectedHole] = useState(defaultHole);
   const [nearGreen, setNearGreen] = useState(false);
 
+  const detectedHoleRef = useRef(defaultHole);
   const candidateRef = useRef<number | null>(null);
   const candidateCountRef = useRef(0);
   const manualOverrideRef = useRef<number | null>(null);
@@ -41,6 +42,7 @@ export function useHoleDetection(
     (hole: number) => {
       if (hole < 1 || hole > holes.length) return;
       setDetectedHole(hole);
+      detectedHoleRef.current = hole;
       manualOverrideRef.current = hole;
       manualTimestampRef.current = Date.now();
       candidateRef.current = null;
@@ -51,6 +53,8 @@ export function useHoleDetection(
 
   useEffect(() => {
     if (!position || holes.length === 0) return;
+
+    const currentDetected = detectedHoleRef.current;
 
     // Check manual override timeout
     const isManualActive =
@@ -83,20 +87,21 @@ export function useHoleDetection(
         candidateCountRef.current = 1;
       }
 
-      if (candidateCountRef.current >= HYSTERESIS_COUNT && closestHole !== detectedHole) {
+      if (candidateCountRef.current >= HYSTERESIS_COUNT && closestHole !== currentDetected) {
         setDetectedHole(closestHole);
+        detectedHoleRef.current = closestHole;
         candidateRef.current = null;
         candidateCountRef.current = 0;
       }
     }
 
     // Check near green for current hole
-    const currentHoleData = holes.find((h) => h.holeNumber === detectedHole);
+    const currentHoleData = holes.find((h) => h.holeNumber === currentDetected);
     if (currentHoleData) {
       const greenDist = distanceToGreen(position, currentHoleData);
       setNearGreen(greenDist !== null && greenDist <= GREEN_PROXIMITY_M);
     }
-  }, [position, holes, detectedHole]);
+  }, [position, holes]);
 
   return { detectedHole, nearGreen, setManualHole };
 }

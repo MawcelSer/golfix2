@@ -315,6 +315,7 @@ describe("round-store", () => {
       await useRoundStore.getState().loadRound("r1");
 
       expect(useRoundStore.getState().error).toBe("Not found");
+      expect(useRoundStore.getState().loading).toBe(false);
     });
   });
 
@@ -329,6 +330,64 @@ describe("round-store", () => {
       expect(state.courseId).toBeNull();
       expect(state.scores.size).toBe(0);
       expect(state.currentHole).toBe(1);
+    });
+
+    it("increments _version", () => {
+      const v1 = useRoundStore.getState()._version;
+      useRoundStore.getState().reset();
+      expect(useRoundStore.getState()._version).toBe(v1 + 1);
+    });
+  });
+
+  describe("saveScore race condition", () => {
+    it("bails out if reset is called mid-flight", async () => {
+      const mockRound: RoundWithScoresResponse = {
+        id: "r1",
+        userId: "u1",
+        courseId: "c1",
+        sessionId: null,
+        status: "in_progress",
+        startedAt: "2026-02-19T10:00:00Z",
+        finishedAt: null,
+        totalScore: null,
+        totalPutts: null,
+        scores: [],
+      };
+
+      // Post resolves, but we'll call reset before put resolves
+      mockPost.mockResolvedValueOnce(mockRound);
+
+      let resolvePut: (value: unknown) => void;
+      mockPut.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolvePut = resolve;
+        }),
+      );
+
+      useRoundStore.getState().startRound("c1", pars);
+      const savePromise = useRoundStore.getState().saveScore(1);
+
+      // Wait for the post to complete and roundId to be set
+      await new Promise((r) => setTimeout(r, 10));
+
+      // Reset mid-flight — increments _version
+      useRoundStore.getState().reset();
+
+      // Resolve the put
+      resolvePut!({
+        id: "s1",
+        roundId: "r1",
+        holeNumber: 1,
+        strokes: 4,
+        putts: 0,
+        fairwayHit: null,
+        greenInRegulation: null,
+      });
+      await savePromise;
+
+      // Store should be in reset state — no score corruption
+      expect(useRoundStore.getState().roundId).toBeNull();
+      expect(useRoundStore.getState().scores.size).toBe(0);
     });
   });
 });

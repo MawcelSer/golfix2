@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SocketClient } from "../services/socket-client";
-import { useAuthStore } from "../stores/auth-store";
-import { useSessionStore } from "../stores/session-store";
-import { enqueuePosition, drainAll, removeN } from "../services/position-queue";
-import { apiClient } from "../services/api-client";
-import { WS_URL } from "../lib/constants";
+import { SocketClient } from "@/services/socket-client";
+import { useAuthStore } from "@/stores/auth-store";
+import { useSessionStore } from "@/stores/session-store";
+import { enqueuePosition, drainAll, removeN } from "@/services/position-queue";
+import { apiClient } from "@/services/api-client";
+import { WS_URL } from "@/lib/constants";
 import type { GpsPosition } from "./use-geolocation";
 import type { PositionUpdate } from "@golfix/shared";
 

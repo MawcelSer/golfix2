@@ -11,6 +11,7 @@ const tabs = [
         stroke="currentColor"
         strokeWidth="2"
         className="h-5 w-5"
+        aria-hidden="true"
       >
         <circle cx="12" cy="12" r="3" />
         <circle cx="12" cy="12" r="8" strokeDasharray="2 3" />
@@ -31,6 +32,7 @@ const tabs = [
         stroke="currentColor"
         strokeWidth="2"
         className="h-5 w-5"
+        aria-hidden="true"
       >
         <rect x="3" y="3" width="7" height="7" rx="1" />
         <rect x="14" y="3" width="7" height="7" rx="1" />
@@ -49,6 +51,7 @@ const tabs = [
         stroke="currentColor"
         strokeWidth="2"
         className="h-5 w-5"
+        aria-hidden="true"
       >
         <circle cx="12" cy="8" r="4" />
         <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
@@ -65,7 +68,7 @@ export function BottomTabs() {
           key={tab.to}
           to={tab.to}
           className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 text-xs font-medium transition-colors ${isActive ? "text-gold" : "text-cream/40"}`
+            `flex min-h-[44px] min-w-[64px] flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors ${isActive ? "text-gold" : "text-cream/40"}`
           }
         >
           {tab.icon}

@@ -2,4 +2,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "/api/v1";
 
 export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN ?? "";
 
-export const WS_URL = import.meta.env.VITE_WS_URL ?? "";
+export const WS_URL = import.meta.env.VITE_WS_URL ?? "http://localhost:3000";
+
+if (import.meta.env.PROD && !import.meta.env.VITE_WS_URL) {
+  console.warn("[golfix] VITE_WS_URL is not set — WebSocket will connect to localhost");
+}

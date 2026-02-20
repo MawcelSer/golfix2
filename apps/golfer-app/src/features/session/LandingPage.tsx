@@ -18,6 +18,7 @@ export function LandingPage() {
   const [locateMessage, setLocateMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showGdpr, setShowGdpr] = useState(false);
+  const [waitingForGps, setWaitingForGps] = useState(false);
 
   const { canInstall, promptInstall } = useInstallPrompt();
   const [installDismissed, setInstallDismissed] = useState(
@@ -52,11 +53,13 @@ export function LandingPage() {
   const locateCourse = useCallback(async () => {
     if (!position) {
       startWatching();
+      setWaitingForGps(true);
       setLocateMessage("Acquisition GPS en cours…");
       setLoading(false);
       return;
     }
 
+    setWaitingForGps(false);
     setLoading(true);
     setLocateMessage(null);
 
@@ -78,6 +81,13 @@ export function LandingPage() {
     }
   }, [position, startWatching, navigate]);
 
+  // Auto-locate when GPS position arrives after user clicked "Démarrer"
+  useEffect(() => {
+    if (waitingForGps && position) {
+      locateCourse();
+    }
+  }, [waitingForGps, position, locateCourse]);
+
   const handleStart = useCallback(() => {
     if (!gdprConsent) {
       setShowGdpr(true);
@@ -86,17 +96,20 @@ export function LandingPage() {
     locateCourse();
   }, [gdprConsent, locateCourse]);
 
-  const handleGdprClose = useCallback(() => {
-    setShowGdpr(false);
-    if (useAuthStore.getState().gdprConsent) {
-      locateCourse();
-    }
-  }, [locateCourse]);
+  const handleGdprClose = useCallback(
+    (accepted: boolean) => {
+      setShowGdpr(false);
+      if (accepted) {
+        locateCourse();
+      }
+    },
+    [locateCourse],
+  );
 
   return (
-    <div className="flex min-h-dvh flex-col bg-pine px-6 pt-12">
+    <div className="flex flex-1 flex-col px-6 pt-12">
       <img src="/icons/app-logo.png" alt="Golfix" className="mb-4 h-12 w-12 self-start" />
-      <h1 className="mb-1 font-display text-2xl text-cream">
+      <h1 className="mb-1 font-display text-3xl text-cream">
         Bienvenue{user?.displayName ? `, ${user.displayName}` : ""}
       </h1>
       <p className="text-sm text-cream/50">Prêt pour le parcours ?</p>

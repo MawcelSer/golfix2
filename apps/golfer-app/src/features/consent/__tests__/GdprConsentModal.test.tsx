@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth-store";
 afterEach(cleanup);
 
 beforeEach(() => {
+  localStorage.clear();
   useAuthStore.getState().reset();
 });
 
@@ -26,7 +27,7 @@ describe("GdprConsentModal", () => {
     expect(screen.getByText(/position GPS/i)).toBeInTheDocument();
   });
 
-  test("accept button sets GDPR consent in store", async () => {
+  test("accept button sets GDPR consent and calls onClose(true)", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     render(<GdprConsentModal open onClose={onClose} />);
@@ -35,10 +36,10 @@ describe("GdprConsentModal", () => {
 
     expect(useAuthStore.getState().gdprConsent).toBe(true);
     expect(useAuthStore.getState().gdprConsentAt).not.toBeNull();
-    expect(onClose).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledWith(true);
   });
 
-  test("refuse button calls onClose without setting consent", async () => {
+  test("refuse button calls onClose(false) without setting consent", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     render(<GdprConsentModal open onClose={onClose} />);
@@ -46,6 +47,6 @@ describe("GdprConsentModal", () => {
     await user.click(screen.getByRole("button", { name: /refuser/i }));
 
     expect(useAuthStore.getState().gdprConsent).toBe(false);
-    expect(onClose).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledWith(false);
   });
 });

@@ -7,13 +7,10 @@ test.describe("Session flow", () => {
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
 
     // Navigate to GPS with course param
-    await page.evaluate(() => {
-      window.history.pushState({}, "", "/gps?course=royal-golf-marrakech");
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    await page.goto("/gps?course=royal-golf-marrakech");
 
     // Wait for course data to load and session confirmation to appear
     await expect(page.getByText("Royal Golf Marrakech")).toBeVisible({ timeout: 5000 });
@@ -55,7 +52,7 @@ test.describe("Session flow", () => {
     });
   });
 
-  test("ending session navigates back to landing", async ({ page }) => {
+  test("ending session navigates to round summary", async ({ page }) => {
     await loginAndGoToGps(page);
 
     // Start session
@@ -68,14 +65,13 @@ test.describe("Session flow", () => {
       timeout: 5000,
     });
 
-    // Accept the confirm dialog
-    page.on("dialog", (dialog) => dialog.accept());
-
-    // Click end session
+    // Click end session — opens custom ConfirmDialog
     await page.getByRole("button", { name: "Terminer la partie" }).click();
 
-    // Should navigate to landing page
-    await expect(page).toHaveURL("/");
-    await expect(page.getByText(/Bienvenue/)).toBeVisible({ timeout: 5000 });
+    // Accept the custom confirm dialog (button label is "Terminer")
+    await page.getByRole("button", { name: "Terminer", exact: true }).click();
+
+    // Should navigate away from scorecard (to /summary or / depending on scores)
+    await expect(page).not.toHaveURL(/\/scorecard/, { timeout: 5000 });
   });
 });

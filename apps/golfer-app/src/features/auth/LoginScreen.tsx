@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { apiClient } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AuthResponse } from "@golfix/shared";
+
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(8, "8 caractères minimum"),
+});
 
 export function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -15,12 +21,19 @@ export function LoginScreen() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      setError(result.error.errors[0]!.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await apiClient.post<AuthResponse>("/auth/login", { email, password });
       setAuth(response);
-      navigate("/gps");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
     } finally {
@@ -31,7 +44,7 @@ export function LoginScreen() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-pine px-6">
       <img src="/icons/app-logo.png" alt="Golfix" className="mb-8 h-16" />
-      <h1 className="mb-6 font-display text-2xl text-cream">Connexion</h1>
+      <h1 className="mb-6 font-display text-3xl text-cream">Connexion</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-sm font-medium text-cream">

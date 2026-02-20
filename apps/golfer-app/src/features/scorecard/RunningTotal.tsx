@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { HoleData } from "@golfix/shared";
 import type { LocalScore } from "@/stores/round-store";
 
@@ -13,18 +14,22 @@ function formatVsPar(totalStrokes: number, totalPar: number): string {
 }
 
 export function RunningTotal({ scores, holes }: RunningTotalProps) {
-  let totalStrokes = 0;
-  let totalPar = 0;
-  let holesPlayed = 0;
+  const { totalStrokes, totalPar, holesPlayed } = useMemo(() => {
+    let strokes = 0;
+    let par = 0;
+    let played = 0;
 
-  for (const hole of holes) {
-    const score = scores.get(hole.holeNumber);
-    if (score) {
-      totalStrokes += score.strokes;
-      totalPar += hole.par;
-      holesPlayed++;
+    for (const hole of holes) {
+      const score = scores.get(hole.holeNumber);
+      if (score) {
+        strokes += score.strokes;
+        par += hole.par;
+        played++;
+      }
     }
-  }
+
+    return { totalStrokes: strokes, totalPar: par, holesPlayed: played };
+  }, [scores, holes]);
 
   if (holesPlayed === 0) {
     return (

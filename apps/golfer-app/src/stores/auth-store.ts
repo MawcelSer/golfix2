@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { AuthUser, AuthTokens, AuthResponse } from "@golfix/shared";
 
 interface AuthState {
@@ -26,40 +27,55 @@ const initialState: AuthState = {
   gdprConsentAt: null,
 };
 
-export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
-  ...initialState,
+export const useAuthStore = create<AuthState & AuthActions>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  setAuth: (response) =>
-    set({
-      user: response.user,
-      accessToken: response.accessToken,
-      refreshToken: response.refreshToken,
+      setAuth: (response) =>
+        set({
+          user: response.user,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        }),
+
+      updateTokens: (tokens) =>
+        set({
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        }),
+
+      acceptGdpr: () =>
+        set({
+          gdprConsent: true,
+          gdprConsentAt: Date.now(),
+        }),
+
+      revokeGdpr: () =>
+        set({
+          gdprConsent: false,
+          gdprConsentAt: null,
+        }),
+
+      logout: () =>
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+        }),
+
+      reset: () => set(initialState),
     }),
-
-  updateTokens: (tokens) =>
-    set({
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    }),
-
-  acceptGdpr: () =>
-    set({
-      gdprConsent: true,
-      gdprConsentAt: Date.now(),
-    }),
-
-  revokeGdpr: () =>
-    set({
-      gdprConsent: false,
-      gdprConsentAt: null,
-    }),
-
-  logout: () =>
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-    }),
-
-  reset: () => set(initialState),
-}));
+    {
+      name: "golfix-auth",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        user: state.user,
+        gdprConsent: state.gdprConsent,
+        gdprConsentAt: state.gdprConsentAt,
+      }),
+    },
+  ),
+);

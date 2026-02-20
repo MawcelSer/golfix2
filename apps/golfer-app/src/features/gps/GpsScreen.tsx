@@ -92,6 +92,30 @@ export function GpsScreen() {
     );
   }
 
+  // Session finishing — show spinner
+  if (sessionStatus === "finishing") {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-cream/70">Fin de session…</p>
+      </div>
+    );
+  }
+
+  // Session ended — offer link to summary
+  if (sessionStatus === "ended") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
+        <p className="text-cream/70">Session terminée</p>
+        <a
+          href="/summary"
+          className="rounded-xl bg-green-mid px-6 py-3 text-sm font-medium text-cream"
+        >
+          Voir le résumé
+        </a>
+      </div>
+    );
+  }
+
   // Session confirmation — show before starting GPS
   if (sessionStatus === "idle" || sessionStatus === "starting") {
     return (
@@ -119,7 +143,7 @@ export function GpsScreen() {
   const playerPos = position ? { lat: position.lat, lng: position.lng } : null;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Hole header with navigation */}
       <HoleSelector
         currentHole={detectedHole}
@@ -131,7 +155,7 @@ export function GpsScreen() {
       />
 
       {/* Hole illustration */}
-      <div className="flex-1 px-3 py-2">
+      <div className="min-h-0 flex-1 px-3 py-2">
         <HoleIllustration
           holeNumber={detectedHole}
           par={hole?.par ?? 4}
@@ -159,18 +183,27 @@ export function GpsScreen() {
       )}
 
       {/* GPS status footer */}
-      <div className="px-3 pb-2 pt-2 text-center">
+      <div className="flex justify-center px-3 pb-2 pt-2">
         {gpsError && (
-          <p className="text-sm text-gold">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/10 px-3 py-1 text-sm text-gold">
+            <span className="h-2 w-2 rounded-full bg-gold" />
             {gpsError === "permission_denied"
               ? "GPS refusé — activez la géolocalisation"
               : "Signal GPS indisponible"}
-          </p>
+          </span>
         )}
         {!gpsError && position && (
-          <p className="text-xs text-sage">Précision GPS : ±{Math.round(position.accuracy)} m</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-cream/5 px-3 py-1 text-xs text-sage">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-green-light" />
+            Précision GPS : ±{Math.round(position.accuracy)} m
+          </span>
         )}
-        {!gpsError && !position && <p className="text-xs text-sage">Acquisition GPS…</p>}
+        {!gpsError && !position && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-cream/5 px-3 py-1 text-xs text-sage">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-gold" />
+            Acquisition GPS…
+          </span>
+        )}
       </div>
     </div>
   );

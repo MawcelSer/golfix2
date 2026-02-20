@@ -21,13 +21,14 @@ test.describe("Login flow", () => {
     await expect(page.getByRole("button", { name: "Connexion" })).toBeVisible();
   });
 
-  test("navigates to /gps after successful login", async ({ page }) => {
+  test("navigates to landing page after successful login", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
 
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("Bienvenue")).toBeVisible();
   });
 
   test("shows error on failed login", async ({ page }) => {
@@ -36,13 +37,13 @@ test.describe("Login flow", () => {
       route.fulfill({
         status: 401,
         contentType: "application/json",
-        body: JSON.stringify({ message: "Email ou mot de passe incorrect" }),
+        body: JSON.stringify({ error: "Email ou mot de passe incorrect", statusCode: 401 }),
       }),
     );
 
     await page.goto("/login");
     await page.getByLabel("Email").fill("wrong@email.com");
-    await page.getByLabel("Mot de passe").fill("wrong");
+    await page.getByLabel("Mot de passe").fill("wrongpassword");
     await page.getByRole("button", { name: "Connexion" }).click();
 
     await expect(page.getByText("Email ou mot de passe incorrect")).toBeVisible();
@@ -70,14 +71,15 @@ test.describe("Register flow", () => {
     await expect(page.getByLabel("Mot de passe")).toBeVisible();
   });
 
-  test("navigates to /gps after successful registration", async ({ page }) => {
+  test("navigates to landing page after successful registration", async ({ page }) => {
     await page.goto("/register");
     await page.getByLabel("Nom").fill("Jean Test");
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Créer mon compte" }).click();
 
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("Bienvenue")).toBeVisible();
   });
 
   test("has link back to login", async ({ page }) => {
@@ -94,12 +96,13 @@ test.describe("Anonymous flow", () => {
     await expect(page.getByLabel(/nom/i)).toBeVisible();
   });
 
-  test("navigates to /gps after anonymous auth", async ({ page }) => {
+  test("navigates to landing page after anonymous auth", async ({ page }) => {
     await page.goto("/anonymous");
     await page.getByLabel(/nom/i).fill("Joueur Anonyme");
     await page.getByRole("button", { name: "Continuer" }).click();
 
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("Bienvenue")).toBeVisible();
   });
 });
 
@@ -110,7 +113,7 @@ test.describe("Post-auth navigation", () => {
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
 
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
     await expect(page.getByRole("link", { name: "GPS" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Carte" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
@@ -122,7 +125,7 @@ test.describe("Post-auth navigation", () => {
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
 
     // Navigate to scorecard
     await page.getByRole("link", { name: "Carte" }).click();

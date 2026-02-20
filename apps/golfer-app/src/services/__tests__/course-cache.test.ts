@@ -15,8 +15,7 @@ vi.mock("idb-keyval", () => ({
   }),
 }));
 
-const { getCachedCourse, setCachedCourse, clearCachedCourse, isCacheValid } =
-  await import("../course-cache");
+const { getCachedCourse, setCachedCourse, clearCachedCourse } = await import("../course-cache");
 
 function makeCourse(overrides: Partial<CourseData> = {}): CourseData {
   return {
@@ -71,15 +70,5 @@ describe("course-cache", () => {
 
     const cached = await getCachedCourse("test-course");
     expect(cached).toBeNull();
-  });
-
-  it("validates cache version from nested data", async () => {
-    await setCachedCourse(makeCourse({ dataVersion: 3 }));
-    expect(await isCacheValid("test-course", 3)).toBe(true);
-    expect(await isCacheValid("test-course", 4)).toBe(false);
-  });
-
-  it("reports invalid for missing cache", async () => {
-    expect(await isCacheValid("nonexistent", 1)).toBe(false);
   });
 });

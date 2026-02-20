@@ -1,9 +1,10 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCourseStore } from "@/stores/course-store";
 import { useRoundStore } from "@/stores/round-store";
 import { useSessionStore } from "@/stores/session-store";
 import { HoleSelector } from "@/features/gps/HoleSelector";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { RunningTotal } from "./RunningTotal";
 import { ScoreEntry } from "./ScoreEntry";
 
@@ -16,9 +17,14 @@ export function ScorecardScreen() {
   const sessionStatus = useSessionStore((s) => s.status);
   const finishSession = useSessionStore((s) => s.finishSession);
 
-  // Initialize round when course is available; reset on course change or unmount
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Initialize round when course is available; guard against stale courseId
   useEffect(() => {
     if (!courseData) return;
+
+    const currentCourseId = useRoundStore.getState().courseId;
+    if (currentCourseId === courseData.id) return;
 
     reset();
     const pars = courseData.holes.map((h) => h.par);
@@ -43,9 +49,8 @@ export function ScorecardScreen() {
     }
   }, [currentHole, saveScore, setCurrentHole]);
 
-  const handleFinish = useCallback(async () => {
-    const confirmed = window.confirm("Terminer la partie ?");
-    if (!confirmed) return;
+  const handleFinishConfirm = useCallback(async () => {
+    setShowConfirm(false);
 
     // Save current hole before finishing
     await saveScore(currentHole);
@@ -69,6 +74,8 @@ export function ScorecardScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 pb-4 pt-2">
+      <h1 className="px-4 font-display text-2xl text-cream">{courseData.name}</h1>
+
       <RunningTotal scores={scores} holes={courseData.holes} />
 
       {currentHoleData && (
@@ -98,12 +105,22 @@ export function ScorecardScreen() {
       {sessionStatus === "active" && (
         <button
           type="button"
-          onClick={handleFinish}
+          onClick={() => setShowConfirm(true)}
           className="mx-4 mt-4 rounded-xl border border-cream/20 py-3 text-sm font-medium text-cream/70"
         >
           Terminer la partie
         </button>
       )}
+
+      <ConfirmDialog
+        open={showConfirm}
+        title="Terminer la partie ?"
+        message="Votre score sera sauvegardé."
+        confirmLabel="Terminer"
+        cancelLabel="Annuler"
+        onConfirm={handleFinishConfirm}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   );
 }

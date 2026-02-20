@@ -36,17 +36,17 @@ export function StatsSummary({ stats }: StatsSummaryProps) {
 
       {/* Stat chips */}
       <div className="flex justify-center gap-3">
-        <div className="rounded-2xl bg-cream/5 px-4 py-3 text-center">
+        <div className="min-w-[5rem] flex-1 rounded-2xl bg-cream/5 px-4 py-3 text-center">
           <p className="text-xs uppercase tracking-widest text-cream/50">Putts</p>
           <p className="mt-1 font-mono text-lg font-medium text-cream">{stats.totalPutts}</p>
         </div>
-        <div className="rounded-2xl bg-cream/5 px-4 py-3 text-center">
+        <div className="min-w-[5rem] flex-1 rounded-2xl bg-cream/5 px-4 py-3 text-center">
           <p className="text-xs uppercase tracking-widest text-cream/50">FIR</p>
           <p className="mt-1 font-mono text-lg font-medium text-cream">
             {formatPercent(stats.firPercent)}
           </p>
         </div>
-        <div className="rounded-2xl bg-cream/5 px-4 py-3 text-center">
+        <div className="min-w-[5rem] flex-1 rounded-2xl bg-cream/5 px-4 py-3 text-center">
           <p className="text-xs uppercase tracking-widest text-cream/50">GIR</p>
           <p className="mt-1 font-mono text-lg font-medium text-cream">
             {formatPercent(stats.girPercent)}

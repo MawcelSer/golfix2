@@ -237,6 +237,21 @@ describe("GpsScreen", () => {
     expect(screen.getByText("GPS refusé — activez la géolocalisation")).toBeInTheDocument();
   });
 
+  it("shows spinner when session is finishing", () => {
+    mockSessionStatus = "finishing";
+    mockCourseData.courseData = makeCourse();
+    renderGps();
+    expect(screen.getByText("Fin de session…")).toBeInTheDocument();
+  });
+
+  it("shows summary link when session is ended", () => {
+    mockSessionStatus = "ended";
+    mockCourseData.courseData = makeCourse();
+    renderGps();
+    expect(screen.getByText("Session terminée")).toBeInTheDocument();
+    expect(screen.getByText("Voir le résumé")).toBeInTheDocument();
+  });
+
   it("displays GPS accuracy", () => {
     mockSessionStatus = "active";
     mockCourseData.courseData = makeCourse();
