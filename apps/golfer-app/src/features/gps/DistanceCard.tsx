@@ -30,9 +30,7 @@ export function DistanceTriptych({ front, center, back }: DistanceTriptychProps)
 
       <div className="flex flex-col items-center">
         <span className="text-xs uppercase tracking-widest text-cream/50">Arrière</span>
-        <span className="mt-1 font-mono text-2xl text-cream/80">
-          {back !== null ? back : "—"}
-        </span>
+        <span className="mt-1 font-mono text-2xl text-cream/80">{back !== null ? back : "—"}</span>
       </div>
     </div>
   );

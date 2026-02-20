@@ -25,13 +25,9 @@ const GREEN_Y = 60;
 const CENTER_X = 100;
 
 function toSvgY(tee: LatLng, green: LatLng, point: LatLng): number {
-  const totalDist = Math.sqrt(
-    (green.lat - tee.lat) ** 2 + (green.lng - tee.lng) ** 2,
-  );
+  const totalDist = Math.sqrt((green.lat - tee.lat) ** 2 + (green.lng - tee.lng) ** 2);
   if (totalDist === 0) return TEE_Y;
-  const pointDist = Math.sqrt(
-    (point.lat - tee.lat) ** 2 + (point.lng - tee.lng) ** 2,
-  );
+  const pointDist = Math.sqrt((point.lat - tee.lat) ** 2 + (point.lng - tee.lng) ** 2);
   const ratio = Math.min(1, Math.max(0, pointDist / totalDist));
   return TEE_Y - ratio * (TEE_Y - GREEN_Y);
 }
@@ -70,12 +66,8 @@ export function HoleIllustration({
     );
   }
 
-  const playerSvgY = playerPosition
-    ? toSvgY(teePosition, greenCenter, playerPosition)
-    : null;
-  const playerSvgX = playerPosition
-    ? toSvgX(teePosition, greenCenter, playerPosition)
-    : null;
+  const playerSvgY = playerPosition ? toSvgY(teePosition, greenCenter, playerPosition) : null;
+  const playerSvgX = playerPosition ? toSvgX(teePosition, greenCenter, playerPosition) : null;
 
   return (
     <svg

@@ -116,9 +116,7 @@ export function GpsScreen() {
   // Prepare illustration props
   const teePos = hole?.teePosition ? { lat: hole.teePosition.y, lng: hole.teePosition.x } : null;
   const greenPos = hole?.greenCenter ? { lat: hole.greenCenter.y, lng: hole.greenCenter.x } : null;
-  const greenFront = hole?.greenFront
-    ? { lat: hole.greenFront.y, lng: hole.greenFront.x }
-    : null;
+  const greenFront = hole?.greenFront ? { lat: hole.greenFront.y, lng: hole.greenFront.x } : null;
   const greenBack = hole?.greenBack ? { lat: hole.greenBack.y, lng: hole.greenBack.x } : null;
   const playerPos = position ? { lat: position.lat, lng: position.lng } : null;
 
@@ -152,11 +150,7 @@ export function GpsScreen() {
 
       {/* Distance triptych */}
       <div className="px-3">
-        <DistanceTriptych
-          front={distances.front}
-          center={distances.center}
-          back={distances.back}
-        />
+        <DistanceTriptych front={distances.front} center={distances.center} back={distances.back} />
       </div>
 
       {/* Near green badge */}

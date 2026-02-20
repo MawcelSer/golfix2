@@ -21,9 +21,7 @@ export function HoleBreakdown({ holeDetails }: HoleBreakdownProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-cream/10">
-            <th className="py-2 text-left text-xs uppercase tracking-widest text-cream/50">
-              Trou
-            </th>
+            <th className="py-2 text-left text-xs uppercase tracking-widest text-cream/50">Trou</th>
             <th className="py-2 text-center text-xs uppercase tracking-widest text-cream/50">
               Par
             </th>
