@@ -7,6 +7,10 @@ export const locateSchema = z.object({
   lng: z.number().min(-180).max(180),
 });
 
+export const courseSlugParamSchema = z.object({
+  slug: z.string().min(1).max(100),
+});
+
 // ── Inferred types ──────────────────────────────────────────────────
 
 export type LocateInput = z.infer<typeof locateSchema>;

@@ -15,6 +15,10 @@ export const upsertScoreSchema = z.object({
   greenInRegulation: z.boolean().nullable().optional(),
 });
 
+export const roundIdParamSchema = z.object({
+  id: z.string().uuid(),
+});
+
 // ── Inferred types ──────────────────────────────────────────────────
 
 export type CreateRoundInput = z.infer<typeof createRoundSchema>;

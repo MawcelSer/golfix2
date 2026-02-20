@@ -18,6 +18,15 @@ export const listTeeTimesSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD format"),
 });
 
+export const courseIdParamSchema = z.object({
+  courseId: z.string().uuid(),
+});
+
+export const teeTimeIdParamSchema = z.object({
+  courseId: z.string().uuid(),
+  teeTimeId: z.string().uuid(),
+});
+
 // ── Inferred types ──────────────────────────────────────────────────
 
 export type CreateTeeTimeInput = z.infer<typeof createTeeTimeSchema>;

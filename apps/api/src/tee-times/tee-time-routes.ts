@@ -1,6 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodError } from "zod";
-import { createTeeTimeSchema, updateTeeTimeSchema, listTeeTimesSchema } from "./tee-time-schemas";
+import {
+  createTeeTimeSchema,
+  updateTeeTimeSchema,
+  listTeeTimesSchema,
+  courseIdParamSchema,
+  teeTimeIdParamSchema,
+} from "./tee-time-schemas";
 import {
   createTeeTime,
   listTeeTimes,
@@ -26,8 +32,13 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
   // ── GET / ──────────────────────────────────────────────────────────
 
-  app.get<{ Params: { courseId: string }; Querystring: { date?: string } }>("/", {
+  app.get<{ Querystring: { date?: string } }>("/", {
     handler: async (request, reply) => {
+      const paramsParsed = courseIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       const date = request.query.date ?? new Date().toISOString().split("T")[0]!;
       const parsed = listTeeTimesSchema.safeParse({ date });
       if (!parsed.success) {
@@ -35,7 +46,7 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
       }
 
       try {
-        const result = await listTeeTimes(request.params.courseId, parsed.data.date);
+        const result = await listTeeTimes(paramsParsed.data.courseId, parsed.data.date);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof TeeTimeError) {
@@ -50,15 +61,20 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
   // ── POST / ─────────────────────────────────────────────────────────
 
-  app.post<{ Params: { courseId: string } }>("/", {
+  app.post("/", {
     handler: async (request, reply) => {
+      const paramsParsed = courseIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       const parsed = createTeeTimeSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
-        const result = await createTeeTime(request.params.courseId, parsed.data);
+        const result = await createTeeTime(paramsParsed.data.courseId, parsed.data);
         return reply.status(201).send(result);
       } catch (error) {
         if (error instanceof TeeTimeError) {
@@ -73,10 +89,15 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
   // ── GET /:teeTimeId ───────────────────────────────────────────────
 
-  app.get<{ Params: { courseId: string; teeTimeId: string } }>("/:teeTimeId", {
+  app.get("/:teeTimeId", {
     handler: async (request, reply) => {
+      const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       try {
-        const result = await getTeeTime(request.params.teeTimeId, request.params.courseId);
+        const result = await getTeeTime(paramsParsed.data.teeTimeId, paramsParsed.data.courseId);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof TeeTimeError) {
@@ -91,8 +112,13 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
   // ── PUT /:teeTimeId ──────────────────────────────────────────────
 
-  app.put<{ Params: { courseId: string; teeTimeId: string } }>("/:teeTimeId", {
+  app.put("/:teeTimeId", {
     handler: async (request, reply) => {
+      const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       const parsed = updateTeeTimeSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
@@ -100,8 +126,8 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const result = await updateTeeTime(
-          request.params.teeTimeId,
-          request.params.courseId,
+          paramsParsed.data.teeTimeId,
+          paramsParsed.data.courseId,
           parsed.data,
         );
         return reply.status(200).send(result);
@@ -118,10 +144,15 @@ export async function teeTimeRoutes(app: FastifyInstance): Promise<void> {
 
   // ── DELETE /:teeTimeId ────────────────────────────────────────────
 
-  app.delete<{ Params: { courseId: string; teeTimeId: string } }>("/:teeTimeId", {
+  app.delete("/:teeTimeId", {
     handler: async (request, reply) => {
+      const paramsParsed = teeTimeIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply.status(400).send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       try {
-        await deleteTeeTime(request.params.teeTimeId, request.params.courseId);
+        await deleteTeeTime(paramsParsed.data.teeTimeId, paramsParsed.data.courseId);
         return reply.status(204).send();
       } catch (error) {
         if (error instanceof TeeTimeError) {
