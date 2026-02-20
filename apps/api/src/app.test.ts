@@ -15,6 +15,9 @@ describe("API health check", () => {
     const body = response.json();
     expect(body.status).toBe("ok");
     expect(body.timestamp).toBeDefined();
+    expect(body).toHaveProperty("uptime");
+    expect(body).toHaveProperty("version");
+    expect(body.db).toBe("connected");
 
     await app.close();
   });

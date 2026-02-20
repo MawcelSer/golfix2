@@ -2,6 +2,8 @@ import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import { sql } from "drizzle-orm";
+import { db } from "./db/connection";
 
 export async function buildApp() {
   const app = Fastify({
@@ -60,7 +62,20 @@ export async function buildApp() {
   await app.register(
     async (api) => {
       api.get("/health", async () => {
-        return { status: "ok", timestamp: new Date().toISOString() };
+        let dbStatus = "connected";
+        try {
+          await db.execute(sql`SELECT 1`);
+        } catch {
+          dbStatus = "disconnected";
+        }
+
+        return {
+          status: dbStatus === "connected" ? "ok" : "degraded",
+          timestamp: new Date().toISOString(),
+          uptime: process.uptime(),
+          version: process.env.npm_package_version ?? "0.0.0",
+          db: dbStatus,
+        };
       });
 
       const { authRoutes } = await import("./auth/auth-routes");
