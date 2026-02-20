@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "../../app";
 import { db } from "../../db/connection";
-import { users, courseRoles } from "../../db/schema/core";
+import { users, courseRoles, courses } from "../../db/schema/core";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 
@@ -25,9 +25,7 @@ describe("PATCH /api/v1/courses/:courseId/settings", () => {
     app = await buildApp();
 
     // Get seed course
-    const [course] = await db.execute<{ id: string }>(
-      /*sql*/ `SELECT id FROM courses LIMIT 1`,
-    );
+    const [course] = await db.execute<{ id: string }>(/*sql*/ `SELECT id FROM courses LIMIT 1`);
     if (!course) throw new Error("No seed course — run pnpm db:seed");
     courseId = course.id;
 
@@ -73,6 +71,8 @@ describe("PATCH /api/v1/courses/:courseId/settings", () => {
   });
 
   afterAll(async () => {
+    // Restore original pace target
+    await db.update(courses).set({ paceTargetMinutes: 255 }).where(eq(courses.id, courseId));
     await db.delete(courseRoles).where(eq(courseRoles.userId, ownerUserId));
     await db.delete(courseRoles).where(eq(courseRoles.userId, viewerUserId));
     await db.delete(users).where(eq(users.id, ownerUserId));
@@ -91,6 +91,9 @@ describe("PATCH /api/v1/courses/:courseId/settings", () => {
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.paceTargetMinutes).toBe(240);
+
+    // Restore original value to avoid polluting other tests
+    await db.update(courses).set({ paceTargetMinutes: 255 }).where(eq(courses.id, courseId));
   });
 
   it("returns 403 for viewer role", async () => {
@@ -147,9 +150,7 @@ describe("Role management endpoints", () => {
   beforeAll(async () => {
     app = await buildApp();
 
-    const [course] = await db.execute<{ id: string }>(
-      /*sql*/ `SELECT id FROM courses LIMIT 1`,
-    );
+    const [course] = await db.execute<{ id: string }>(/*sql*/ `SELECT id FROM courses LIMIT 1`);
     if (!course) throw new Error("No seed course");
     courseId = course.id;
 
