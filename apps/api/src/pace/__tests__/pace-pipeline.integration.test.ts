@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PaceEngineManager } from "../pace-engine-manager";
-import { createGroupState, type HoleData } from "../pace-types";
+import type { GroupState, HoleData } from "../pace-types";
 import type { DashboardGroupUpdate } from "@golfix/shared";
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ function makeHoles(count: number): HoleData[] {
 
 // Minimal serializer (same logic as pace-engine-plugin)
 function serializeGroup(
-  group: ReturnType<typeof createGroupState>,
+  group: GroupState,
   projectedFinish: Date | null,
   positions: Map<string, { lat: number; lng: number }>,
 ): DashboardGroupUpdate {
@@ -273,7 +273,7 @@ describe("Pace Pipeline Integration", () => {
     expect(entry1.engine).not.toBe(entry2.engine);
 
     manager.feedPosition("course-a", "s1", 48.41, 2.68, 1, new Date());
-    manager.feedPosition("course-b", "s2", 43.60, 1.44, 1, new Date());
+    manager.feedPosition("course-b", "s2", 43.6, 1.44, 1, new Date());
 
     expect(entry1.positions.size).toBe(1);
     expect(entry2.positions.size).toBe(1);
