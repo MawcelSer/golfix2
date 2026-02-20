@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -7,7 +8,12 @@ const certDir = path.resolve(__dirname, "../../certs");
 const hasCerts = fs.existsSync(path.join(certDir, "localhost.pem"));
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
   server: {
     port: 5174,
     https: hasCerts

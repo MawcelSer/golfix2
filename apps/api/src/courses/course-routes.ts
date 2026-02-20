@@ -1,11 +1,27 @@
 import type { FastifyInstance } from "fastify";
-import { locateSchema, courseSlugParamSchema } from "./course-schemas";
-import { locateCourse, getCourseData } from "./course-service";
+import { locateSchema, courseSlugParamSchema, courseIdParamSchema } from "./course-schemas";
+import {
+  locateCourse,
+  getCourseData,
+  getCourseDataById,
+  getManagedCourses,
+} from "./course-service";
+import { verifyToken } from "../middleware/auth-middleware";
 import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
 export async function courseRoutes(app: FastifyInstance): Promise<void> {
+  // ── GET /managed ────────────────────────────────────────────────────
+
+  app.get("/managed", {
+    onRequest: [verifyToken],
+    handler: async (request, reply) => {
+      const courses = await getManagedCourses(request.userId!);
+      return reply.status(200).send(courses);
+    },
+  });
+
   // ── POST /locate ──────────────────────────────────────────────────
 
   app.post("/locate", {
@@ -24,6 +40,25 @@ export async function courseRoutes(app: FastifyInstance): Promise<void> {
       }
 
       return reply.status(200).send(result);
+    },
+  });
+
+  // ── GET /by-id/:courseId/data ──────────────────────────────────────
+
+  app.get("/by-id/:courseId/data", {
+    onRequest: [verifyToken],
+    handler: async (request, reply) => {
+      const parsed = courseIdParamSchema.safeParse(request.params);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
+      }
+
+      const data = await getCourseDataById(parsed.data.courseId);
+      if (!data) {
+        return reply.status(404).send({ error: "Course not found", statusCode: 404 });
+      }
+
+      return reply.status(200).send(data);
     },
   });
 

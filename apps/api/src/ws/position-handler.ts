@@ -5,6 +5,7 @@ import { db } from "../db/connection";
 import { sessions } from "../db/schema/index";
 import { positionBuffer } from "../positions/position-buffer";
 import { detectHole } from "../spatial/spatial-service";
+import type { PaceEngineManager } from "../pace/pace-engine-manager";
 
 // ── Validation schema ──────────────────────────────────────────────
 
@@ -37,7 +38,11 @@ async function verifySession(
 
 // ── Handler ────────────────────────────────────────────────────────
 
-export function registerPositionHandler(io: Server, socket: Socket): void {
+export function registerPositionHandler(
+  io: Server,
+  socket: Socket,
+  paceEngineManager?: PaceEngineManager,
+): void {
   socket.on("position:update", async (data: unknown) => {
     // 1. Validate with Zod
     const result = positionUpdateSchema.safeParse(data);
@@ -84,7 +89,19 @@ export function registerPositionHandler(io: Server, socket: Socket): void {
       // Non-critical — continue without hole detection
     }
 
-    // 5. Emit to dashboard room
+    // 5. Feed pace engine manager
+    if (paceEngineManager) {
+      paceEngineManager.feedPosition(
+        courseId,
+        sessionId,
+        lat,
+        lng,
+        holeNumber,
+        new Date(recordedAt),
+      );
+    }
+
+    // 6. Emit to dashboard room
     io.to(`course:${courseId}:dashboard`).emit("position:broadcast", {
       sessionId,
       lat,

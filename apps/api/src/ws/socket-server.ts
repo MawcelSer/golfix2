@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import type { FastifyInstance } from "fastify";
 import { verifyAccessToken } from "../auth/auth-service";
 import { registerPositionHandler } from "./position-handler";
+import type { PaceEngineManager } from "../pace/pace-engine-manager";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -100,7 +101,9 @@ export function setupSocketServer(app: FastifyInstance): Server {
 
     // ── Position handler ──────────────────────────────────────
 
-    registerPositionHandler(io, socket);
+    // Lazy access: paceEngineManager is decorated after socket server setup
+    const manager = (app as unknown as { paceEngineManager?: PaceEngineManager }).paceEngineManager;
+    registerPositionHandler(io, socket, manager);
 
     // ── Disconnect ────────────────────────────────────────────
 
