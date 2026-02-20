@@ -74,7 +74,7 @@ export function ScorecardScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 pb-4 pt-2">
-      <h1 className="px-4 font-display text-xl text-cream">{courseData.name}</h1>
+      <h1 className="px-4 font-display text-2xl text-cream">{courseData.name}</h1>
 
       <RunningTotal scores={scores} holes={courseData.holes} />
 

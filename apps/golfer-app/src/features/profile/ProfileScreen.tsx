@@ -62,7 +62,7 @@ export function ProfileScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 pt-6">
-      <h1 className="font-display text-xl text-cream">Profil</h1>
+      <h1 className="font-display text-2xl text-cream">Profil</h1>
 
       {/* User info with avatar */}
       <div className="flex items-center gap-4 rounded-2xl bg-cream/5 px-4 py-4">

@@ -42,7 +42,7 @@ export function RoundSummaryScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 pb-4 pt-6">
-      <h1 className="text-center font-display text-xl text-cream">Résumé de la partie</h1>
+      <h1 className="text-center font-display text-2xl text-cream">Résumé de la partie</h1>
 
       <StatsSummary stats={stats} />
 

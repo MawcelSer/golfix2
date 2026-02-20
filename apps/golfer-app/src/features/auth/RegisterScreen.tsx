@@ -36,7 +36,7 @@ export function RegisterScreen() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-pine px-6">
       <img src="/icons/app-logo.png" alt="Golfix" className="mb-8 h-16" />
-      <h1 className="mb-6 font-display text-2xl text-cream">Créer un compte</h1>
+      <h1 className="mb-6 font-display text-3xl text-cream">Créer un compte</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-cream">

@@ -11,7 +11,7 @@ export function InstallBanner({ onInstall, onDismiss }: InstallBannerProps) {
       <button
         type="button"
         onClick={onInstall}
-        className="rounded-lg bg-green-mid px-4 py-2 text-sm font-medium text-cream"
+        className="rounded-xl bg-green-mid px-4 py-2 text-sm font-medium text-cream"
       >
         Installer
       </button>
