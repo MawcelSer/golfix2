@@ -10,9 +10,9 @@ export const createRoundSchema = z.object({
 export const upsertScoreSchema = z.object({
   holeNumber: z.number().int().min(1).max(18),
   strokes: z.number().int().min(1).max(20),
-  putts: z.number().int().min(0).max(10).optional(),
-  fairwayHit: z.boolean().optional(),
-  greenInRegulation: z.boolean().optional(),
+  putts: z.number().int().min(0).max(10).nullable().optional(),
+  fairwayHit: z.boolean().nullable().optional(),
+  greenInRegulation: z.boolean().nullable().optional(),
 });
 
 // ── Inferred types ──────────────────────────────────────────────────
