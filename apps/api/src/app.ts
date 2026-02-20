@@ -2,21 +2,44 @@ import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import { sql } from "drizzle-orm";
+import { db } from "./db/connection";
+import { captureError } from "./monitoring/sentry";
 
 export async function buildApp() {
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? "info",
       transport: process.env.NODE_ENV !== "production" ? { target: "pino-pretty" } : undefined,
+      redact: {
+        paths: ["req.headers.authorization", "req.headers.cookie"],
+        censor: "[REDACTED]",
+      },
     },
   });
 
   // ── Security ───────────────────────────────────────────────────
 
-  await app.register(helmet);
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'", "wss:", "https:"],
+        workerSrc: ["'self'", "blob:"],
+        manifestSrc: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Required for PWA service worker
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  });
 
   await app.register(cors, {
-    origin: process.env.CORS_ORIGIN ?? ["https://localhost:5173", "https://localhost:5174"],
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+      : ["https://localhost:5173", "https://localhost:5174"],
     credentials: true,
   });
 
@@ -35,6 +58,10 @@ export async function buildApp() {
       statusCode,
     });
 
+    if (statusCode >= 500) {
+      captureError(error, { statusCode });
+    }
+
     reply.status(statusCode).send({
       error: statusCode >= 500 ? "Internal Server Error" : error.message,
       statusCode,
@@ -46,7 +73,22 @@ export async function buildApp() {
   await app.register(
     async (api) => {
       api.get("/health", async () => {
-        return { status: "ok", timestamp: new Date().toISOString() };
+        let dbStatus = "connected";
+        try {
+          await db.execute(sql`SELECT 1`);
+        } catch {
+          dbStatus = "disconnected";
+        }
+
+        const isProd = process.env.NODE_ENV === "production";
+        return {
+          status: dbStatus === "connected" ? "ok" : "degraded",
+          timestamp: new Date().toISOString(),
+          db: dbStatus,
+          ...(isProd
+            ? {}
+            : { uptime: process.uptime(), version: process.env.npm_package_version ?? "0.0.0" }),
+        };
       });
 
       const { authRoutes } = await import("./auth/auth-routes");
@@ -70,6 +112,9 @@ export async function buildApp() {
 
       const { teeTimeRoutes } = await import("./tee-times/tee-time-routes");
       await api.register(teeTimeRoutes, { prefix: "/courses/:courseId/tee-times" });
+
+      const { courseSettingsRoutes } = await import("./courses/course-settings-routes");
+      await api.register(courseSettingsRoutes, { prefix: "/courses/:courseId" });
     },
     { prefix: "/api/v1" },
   );

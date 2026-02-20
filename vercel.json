@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm --filter @golfix/shared build && pnpm --filter @golfix/golfer-app build",
+  "outputDirectory": "apps/golfer-app/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

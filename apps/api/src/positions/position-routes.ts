@@ -1,14 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
 import { positionBatchSchema } from "./position-schemas";
 import { batchInsertPositions, PositionError } from "./position-service";
 import { verifyToken } from "../middleware/auth-middleware";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 

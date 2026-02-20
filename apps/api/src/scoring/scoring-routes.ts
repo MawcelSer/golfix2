@@ -1,6 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
-import { createRoundSchema, upsertScoreSchema } from "./scoring-schemas";
+import { createRoundSchema, upsertScoreSchema, roundIdParamSchema } from "./scoring-schemas";
 import {
   createRound,
   upsertScore,
@@ -9,12 +8,7 @@ import {
   ScoringError,
 } from "./scoring-service";
 import { verifyToken } from "../middleware/auth-middleware";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
@@ -51,15 +45,22 @@ export async function scoringRoutes(app: FastifyInstance): Promise<void> {
 
   // ── PUT /rounds/:id/scores ────────────────────────────────────────
 
-  app.put<{ Params: { id: string } }>("/rounds/:id/scores", {
+  app.put("/rounds/:id/scores", {
     handler: async (request, reply) => {
+      const paramsParsed = roundIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       const parsed = upsertScoreSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
       }
 
       try {
-        const result = await upsertScore(request.params.id, request.userId!, parsed.data);
+        const result = await upsertScore(paramsParsed.data.id, request.userId!, parsed.data);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ScoringError) {
@@ -83,10 +84,17 @@ export async function scoringRoutes(app: FastifyInstance): Promise<void> {
 
   // ── GET /rounds/:id ───────────────────────────────────────────────
 
-  app.get<{ Params: { id: string } }>("/rounds/:id", {
+  app.get("/rounds/:id", {
     handler: async (request, reply) => {
+      const paramsParsed = roundIdParamSchema.safeParse(request.params);
+      if (!paramsParsed.success) {
+        return reply
+          .status(400)
+          .send({ error: formatZodError(paramsParsed.error), statusCode: 400 });
+      }
+
       try {
-        const result = await getRoundDetail(request.params.id, request.userId!);
+        const result = await getRoundDetail(paramsParsed.data.id, request.userId!);
         return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof ScoringError) {

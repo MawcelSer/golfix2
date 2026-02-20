@@ -19,7 +19,7 @@ export class SessionError extends Error {
 
 function formatSession(row: {
   id: string;
-  userId: string;
+  userId: string | null;
   courseId: string;
   groupId: string | null;
   status: string;

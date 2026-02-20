@@ -10,6 +10,10 @@ export const finishSessionSchema = z.object({
   status: z.enum(["finished", "abandoned"]),
 });
 
+export const sessionIdParamSchema = z.object({
+  id: z.string().uuid(),
+});
+
 // ── Inferred types ──────────────────────────────────────────────────
 
 export type StartSessionInput = z.infer<typeof startSessionSchema>;
@@ -25,7 +29,7 @@ export interface StartSessionResponse {
 
 export interface SessionResponse {
   id: string;
-  userId: string;
+  userId: string | null;
   courseId: string;
   groupId: string | null;
   status: string;

@@ -67,9 +67,7 @@ export const sessions = pgTable(
   "sessions",
   {
     id: uuid().primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id),
+    userId: uuid("user_id").references(() => users.id), // Nullable for GDPR anonymization
     courseId: uuid("course_id")
       .notNull()
       .references(() => courses.id),
@@ -78,6 +76,7 @@ export const sessions = pgTable(
     finishedAt: timestamp("finished_at", { withTimezone: true }),
     currentHole: smallint("current_hole"),
     status: sessionStatusEnum().default("active").notNull(),
+    positionSummary: jsonb("position_summary"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()

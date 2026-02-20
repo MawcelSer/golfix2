@@ -53,6 +53,9 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Build shared package
+        run: pnpm --filter @golfix/shared build
+
       - name: Typecheck
         run: pnpm typecheck
 

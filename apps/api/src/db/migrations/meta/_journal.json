@@ -8,6 +8,20 @@
       "when": 1771428546271,
       "tag": "0000_red_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771586220717,
+      "tag": "0001_orange_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771586343596,
+      "tag": "0002_noisy_captain_stacy",
+      "breakpoints": true
     }
   ]
 }

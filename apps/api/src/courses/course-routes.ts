@@ -1,13 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import type { ZodError } from "zod";
-import { locateSchema } from "./course-schemas";
+import { locateSchema, courseSlugParamSchema } from "./course-schemas";
 import { locateCourse, getCourseData } from "./course-service";
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function formatZodError(error: ZodError): string {
-  return error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-}
+import { formatZodError } from "../lib/format-zod-error";
 
 // ── Plugin ──────────────────────────────────────────────────────────
 
@@ -37,7 +31,11 @@ export async function courseRoutes(app: FastifyInstance): Promise<void> {
 
   app.get("/:slug/data", {
     handler: async (request, reply) => {
-      const { slug } = request.params as { slug: string };
+      const parsed = courseSlugParamSchema.safeParse(request.params);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: formatZodError(parsed.error), statusCode: 400 });
+      }
+      const { slug } = parsed.data;
 
       const data = await getCourseData(slug);
       if (!data) {

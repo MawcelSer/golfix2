@@ -2,8 +2,8 @@
 
 > Real-time golf course management platform: GPS distances, pace tracking, course manager dashboard.
 
-**Current sprint:** Sprint 3 — Golfer PWA (next: Session 3E or Sprint 5)
-**Last completed task:** 3.15 Notification preferences (Sprint 3D complete)
+**Current sprint:** Sprint 6 — Deploy & Harden (complete)
+**Last completed task:** 6.15 Pilot preparation (Sprint 6 complete — MVP deployed)
 
 ---
 
