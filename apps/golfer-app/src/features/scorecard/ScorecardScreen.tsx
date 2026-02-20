@@ -84,6 +84,8 @@ export function ScorecardScreen() {
         <HoleSelector
           currentHole={currentHole}
           totalHoles={courseData.holesCount}
+          par={currentHoleData?.par ?? null}
+          distanceMeters={currentHoleData?.distanceMeters ?? null}
           onPrev={handlePrev}
           onNext={handleNext}
         />

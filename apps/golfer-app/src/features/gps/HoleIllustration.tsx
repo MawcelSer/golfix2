@@ -1,11 +1,8 @@
+import type { HazardData } from "@golfix/shared";
+
 interface LatLng {
   lat: number;
   lng: number;
-}
-
-interface Hazard {
-  type: "bunker" | "water";
-  position: LatLng;
 }
 
 interface HoleIllustrationProps {
@@ -16,7 +13,7 @@ interface HoleIllustrationProps {
   greenCenter: LatLng | null;
   greenFront: LatLng | null;
   greenBack: LatLng | null;
-  hazards: Hazard[];
+  hazards: HazardData[];
   playerPosition: LatLng | null;
   distanceToCenter: number | null;
 }
@@ -137,21 +134,24 @@ export function HoleIllustration({
       />
 
       {/* Hazards */}
-      {hazards.map((h, i) => {
-        const hx = toSvgX(teePosition, greenCenter, h.position);
-        const hy = toSvgY(teePosition, greenCenter, h.position);
-        return (
-          <ellipse
-            key={i}
-            cx={hx}
-            cy={hy}
-            rx={10}
-            ry={6}
-            fill={h.type === "bunker" ? "#d4b968" : "#4a9fd4"}
-            opacity={0.6}
-          />
-        );
-      })}
+      {hazards
+        .filter((h) => h.carryPoint != null)
+        .map((h, i) => {
+          const pos = { lat: h.carryPoint!.y, lng: h.carryPoint!.x };
+          const hx = toSvgX(teePosition, greenCenter, pos);
+          const hy = toSvgY(teePosition, greenCenter, pos);
+          return (
+            <ellipse
+              key={i}
+              cx={hx}
+              cy={hy}
+              rx={10}
+              ry={6}
+              fill={h.type === "bunker" ? "#d4b968" : "#4a9fd4"}
+              opacity={0.6}
+            />
+          );
+        })}
 
       {/* Player + dashed line to green */}
       {playerSvgX != null && playerSvgY != null && (

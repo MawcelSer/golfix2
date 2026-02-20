@@ -7,8 +7,9 @@ import { useSocket } from "@/hooks/use-socket";
 import { useCourseStore } from "@/stores/course-store";
 import { useSessionStore } from "@/stores/session-store";
 import { computeHoleDistances } from "./distance-calculator";
-import { DistanceCard } from "./DistanceCard";
+import { DistanceTriptych } from "./DistanceCard";
 import { HoleSelector } from "./HoleSelector";
+import { HoleIllustration } from "./HoleIllustration";
 
 export function GpsScreen() {
   const [searchParams] = useSearchParams();
@@ -74,7 +75,7 @@ export function GpsScreen() {
         <button
           type="button"
           onClick={refetch}
-          className="rounded-lg bg-green-mid px-6 py-2 text-sm font-medium text-cream"
+          className="rounded-xl bg-green-mid px-6 py-2 text-sm font-medium text-cream"
         >
           Réessayer
         </button>
@@ -95,8 +96,8 @@ export function GpsScreen() {
   if (sessionStatus === "idle" || sessionStatus === "starting") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 px-6">
-        <h2 className="text-xl font-semibold text-cream">{courseData.name}</h2>
-        <p className="text-center text-sm text-cream/60">
+        <h2 className="font-display text-xl text-cream">{courseData.name}</h2>
+        <p className="text-center text-sm text-cream/50">
           {courseData.holesCount} trous — Par {courseData.par}
         </p>
         {sessionError && <p className="text-center text-sm text-gold">{sessionError}</p>}
@@ -104,7 +105,7 @@ export function GpsScreen() {
           type="button"
           onClick={() => sessionStart(courseData.id)}
           disabled={sessionStatus === "starting"}
-          className="w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream disabled:opacity-50"
+          className="w-full rounded-xl bg-green-mid py-4 text-lg font-medium text-cream disabled:opacity-50"
         >
           {sessionStatus === "starting" ? "Démarrage…" : "Commencer la session"}
         </button>
@@ -112,43 +113,63 @@ export function GpsScreen() {
     );
   }
 
+  // Prepare illustration props
+  const teePos = hole?.teePosition ? { lat: hole.teePosition.y, lng: hole.teePosition.x } : null;
+  const greenPos = hole?.greenCenter ? { lat: hole.greenCenter.y, lng: hole.greenCenter.x } : null;
+  const greenFront = hole?.greenFront
+    ? { lat: hole.greenFront.y, lng: hole.greenFront.x }
+    : null;
+  const greenBack = hole?.greenBack ? { lat: hole.greenBack.y, lng: hole.greenBack.x } : null;
+  const playerPos = position ? { lat: position.lat, lng: position.lng } : null;
+
   return (
-    <div className="flex h-full flex-col px-4 pt-6">
-      {/* Hole header */}
-      <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-mid">
-          <span className="text-xl font-bold text-cream">{detectedHole}</span>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-cream">Par {hole?.par ?? "—"}</p>
-          <p className="text-sm text-cream/60">{hole?.distanceMeters ?? "—"} m</p>
-        </div>
-        {nearGreen && (
-          <span className="rounded-full bg-green-light/20 px-3 py-1 text-xs font-medium text-green-light">
-            Sur le green
-          </span>
-        )}
-      </div>
+    <div className="flex h-full flex-col">
+      {/* Hole header with navigation */}
+      <HoleSelector
+        currentHole={detectedHole}
+        totalHoles={courseData.holesCount}
+        par={hole?.par ?? null}
+        distanceMeters={hole?.distanceMeters ?? null}
+        onPrev={handlePrev}
+        onNext={handleNext}
+      />
 
-      {/* Distance cards */}
-      <div className="flex flex-1 flex-col gap-3">
-        <DistanceCard label="Avant" distance={distances.front} />
-        <DistanceCard label="Centre" distance={distances.center} variant="primary" />
-        <DistanceCard label="Arrière" distance={distances.back} />
-      </div>
-
-      {/* Hole navigation */}
-      <div className="mt-4">
-        <HoleSelector
-          currentHole={detectedHole}
-          totalHoles={courseData.holesCount}
-          onPrev={handlePrev}
-          onNext={handleNext}
+      {/* Hole illustration */}
+      <div className="flex-1 px-3 py-2">
+        <HoleIllustration
+          holeNumber={detectedHole}
+          par={hole?.par ?? 4}
+          distanceMeters={hole?.distanceMeters ?? 0}
+          teePosition={teePos}
+          greenCenter={greenPos}
+          greenFront={greenFront}
+          greenBack={greenBack}
+          hazards={hole?.hazards ?? []}
+          playerPosition={playerPos}
+          distanceToCenter={distances.center}
         />
       </div>
 
+      {/* Distance triptych */}
+      <div className="px-3">
+        <DistanceTriptych
+          front={distances.front}
+          center={distances.center}
+          back={distances.back}
+        />
+      </div>
+
+      {/* Near green badge */}
+      {nearGreen && (
+        <div className="mt-2 text-center">
+          <span className="rounded-full bg-green-light/20 px-3 py-1 text-xs font-medium text-green-light">
+            Sur le green
+          </span>
+        </div>
+      )}
+
       {/* GPS status footer */}
-      <div className="pb-2 pt-2 text-center">
+      <div className="px-3 pb-2 pt-2 text-center">
         {gpsError && (
           <p className="text-sm text-gold">
             {gpsError === "permission_denied"
