@@ -91,7 +91,7 @@ export function ScoreEntry({ holeNumber, par, holesCount, onAdvance }: ScoreEntr
 
   return (
     <div className="flex flex-col gap-4 px-4">
-      <div className="text-center text-sm text-cream/50">Par {par}</div>
+      <div className="text-center font-display text-sm text-cream/50">Par {par}</div>
 
       <StrokeCounter
         label="Coups"

@@ -24,7 +24,7 @@ export function StatToggle({ label, value, onChange }: StatToggleProps) {
     <button
       type="button"
       onClick={() => onChange(nextState(value))}
-      className={`flex items-center gap-2 rounded-lg px-3 py-2 ${colorClass}`}
+      className={`flex items-center gap-2 rounded-xl px-4 py-2.5 ${colorClass}`}
       aria-label={`${label} : ${displayText}`}
     >
       <span className="text-sm text-cream/70">{label}</span>

@@ -28,9 +28,9 @@ export function RunningTotal({ scores, holes }: RunningTotalProps) {
 
   if (holesPlayed === 0) {
     return (
-      <div className="flex items-center justify-center gap-4 rounded-xl bg-cream/5 px-4 py-3">
+      <div className="mx-4 flex items-center justify-center gap-4 rounded-2xl bg-cream/5 px-4 py-4">
         <span className="text-sm text-cream/50">Total</span>
-        <span className="text-lg font-bold text-cream">—</span>
+        <span className="font-mono text-lg font-bold text-cream">—</span>
       </div>
     );
   }
@@ -44,10 +44,10 @@ export function RunningTotal({ scores, holes }: RunningTotalProps) {
         : "text-gold";
 
   return (
-    <div className="flex items-center justify-center gap-4 rounded-xl bg-cream/5 px-4 py-3">
+    <div className="mx-4 flex items-center justify-center gap-4 rounded-2xl bg-cream/5 px-4 py-4">
       <span className="text-sm text-cream/50">{holesPlayed} trous</span>
-      <span className="text-lg font-bold text-cream">{totalStrokes}</span>
-      <span className={`text-lg font-bold ${vsParColor}`}>{vsPar}</span>
+      <span className="font-mono text-lg font-bold text-cream">{totalStrokes}</span>
+      <span className={`font-display text-lg ${vsParColor}`}>{vsPar}</span>
     </div>
   );
 }

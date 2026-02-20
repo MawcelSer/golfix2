@@ -15,19 +15,19 @@ export function StrokeCounter({ label, value, min, max, onChange }: StrokeCounte
         type="button"
         onClick={() => onChange(value - 1)}
         disabled={value <= min}
-        className="flex h-10 w-10 items-center justify-center rounded-lg bg-cream/10 text-lg text-cream disabled:opacity-30"
+        className="flex h-11 w-11 items-center justify-center rounded-xl bg-cream/10 text-lg text-cream disabled:opacity-30"
         aria-label={`Diminuer ${label}`}
       >
         −
       </button>
 
-      <span className="w-8 text-center text-xl font-bold text-cream">{value}</span>
+      <span className="w-8 text-center font-mono text-xl font-bold text-cream">{value}</span>
 
       <button
         type="button"
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
-        className="flex h-10 w-10 items-center justify-center rounded-lg bg-cream/10 text-lg text-cream disabled:opacity-30"
+        className="flex h-11 w-11 items-center justify-center rounded-xl bg-cream/10 text-lg text-cream disabled:opacity-30"
         aria-label={`Augmenter ${label}`}
       >
         +
