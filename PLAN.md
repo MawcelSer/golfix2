@@ -2,8 +2,8 @@
 
 > Real-time golf course management platform: GPS distances, pace tracking, course manager dashboard.
 
-**Current sprint:** Sprint 6 — Deploy & Harden (complete)
-**Last completed task:** 6.15 Pilot preparation (Sprint 6 complete — MVP deployed)
+**Current sprint:** Sprint 5 — Dashboard & Notifications (complete)
+**Last completed task:** 5D.3 Build config, docs, validate (Sprint 5 complete)
 
 ---
 
