@@ -86,7 +86,7 @@ async function loginAndGoToScorecard(page: Page) {
   await page.getByLabel("Email").fill("test@golfix.fr");
   await page.getByLabel("Mot de passe").fill("password123");
   await page.getByRole("button", { name: "Connexion" }).click();
-  await expect(page).toHaveURL(/\/gps/);
+  await expect(page).toHaveURL("/");
 
   // Navigate with proper route (page.goto triggers full React Router resolution)
   await page.goto("/gps?course=royal-golf-marrakech");
@@ -111,7 +111,7 @@ test.describe("Scorecard flow", () => {
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
 
     await page.getByRole("link", { name: "Carte" }).click();
     await expect(page).toHaveURL(/\/scorecard/);

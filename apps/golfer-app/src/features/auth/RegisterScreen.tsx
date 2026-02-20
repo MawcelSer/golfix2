@@ -39,7 +39,7 @@ export function RegisterScreen() {
         password,
       });
       setAuth(response);
-      navigate("/gps");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur d'inscription");
     } finally {

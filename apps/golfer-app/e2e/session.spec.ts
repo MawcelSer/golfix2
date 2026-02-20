@@ -7,7 +7,7 @@ test.describe("Session flow", () => {
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
-    await expect(page).toHaveURL(/\/gps/);
+    await expect(page).toHaveURL("/");
 
     // Navigate to GPS with course param
     await page.goto("/gps?course=royal-golf-marrakech");

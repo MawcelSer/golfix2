@@ -30,7 +30,7 @@ export function AnonymousScreen() {
         deviceId: getOrCreateDeviceId(),
       });
       setAuth(response);
-      navigate("/gps");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
     } finally {

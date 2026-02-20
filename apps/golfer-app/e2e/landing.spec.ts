@@ -1,19 +1,13 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Landing page", () => {
-  /** Helper: login and navigate to landing page */
+  /** Helper: login — now lands directly on "/" */
   async function loginAndGoHome(page: import("@playwright/test").Page) {
     await page.goto("/login");
     await page.getByLabel("Email").fill("test@golfix.fr");
     await page.getByLabel("Mot de passe").fill("password123");
     await page.getByRole("button", { name: "Connexion" }).click();
-    await expect(page).toHaveURL(/\/gps/);
-
-    // Navigate to home (landing) via SPA navigation
-    await page.evaluate(() => {
-      window.history.pushState({}, "", "/");
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    await expect(page).toHaveURL("/");
     await expect(page.getByText("Démarrer un parcours")).toBeVisible({ timeout: 5000 });
   }
 

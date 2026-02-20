@@ -33,7 +33,7 @@ export function LoginScreen() {
     try {
       const response = await apiClient.post<AuthResponse>("/auth/login", { email, password });
       setAuth(response);
-      navigate("/gps");
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
     } finally {
