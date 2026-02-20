@@ -7,8 +7,8 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="flex min-h-dvh flex-col bg-pine text-cream">
-      <main className="flex-1 pb-14">{children}</main>
+    <div className="flex min-h-dvh flex-col bg-pine font-sans text-cream">
+      <main className="flex flex-1 flex-col pb-14">{children}</main>
       <BottomTabs />
     </div>
   );

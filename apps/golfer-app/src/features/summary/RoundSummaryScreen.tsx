@@ -36,7 +36,7 @@ export function RoundSummaryScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 pb-4 pt-6">
-      <h1 className="text-center text-xl font-semibold text-cream">Résumé de la partie</h1>
+      <h1 className="text-center font-display text-xl text-cream">Résumé de la partie</h1>
 
       <StatsSummary stats={stats} />
 
@@ -45,7 +45,7 @@ export function RoundSummaryScreen() {
       <button
         type="button"
         onClick={handleGoHome}
-        className="mt-auto w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream"
+        className="mt-auto w-full rounded-xl bg-green-mid py-4 text-lg font-medium text-cream"
       >
         Retour à l'accueil
       </button>

@@ -95,21 +95,26 @@ export function LandingPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-pine px-6 pt-12">
-      <img src="/icons/app-logo.png" alt="Golfix" className="mb-4 h-16 w-16 self-start" />
-      <h1 className="mb-2 text-2xl font-semibold text-cream">
+      <img src="/icons/app-logo.png" alt="Golfix" className="mb-4 h-12 w-12 self-start" />
+      <h1 className="mb-1 font-display text-2xl text-cream">
         Bienvenue{user?.displayName ? `, ${user.displayName}` : ""}
       </h1>
+      <p className="text-sm text-cream/50">Prêt pour le parcours ?</p>
 
       <button
         type="button"
         onClick={handleStart}
         disabled={loading}
-        className="mt-6 w-full rounded-xl bg-green-mid py-4 text-lg font-semibold text-cream disabled:opacity-50"
+        className="mt-8 w-full rounded-xl bg-green-mid py-4 text-lg font-medium text-cream disabled:opacity-50"
       >
         {loading ? "Localisation..." : "Démarrer un parcours"}
       </button>
 
-      {locateMessage && <p className="mt-4 text-center text-sm text-gold">{locateMessage}</p>}
+      {locateMessage && (
+        <div className="mt-4 rounded-xl bg-cream/5 px-4 py-3 text-center">
+          <p className="text-sm text-gold">{locateMessage}</p>
+        </div>
+      )}
 
       {canInstall && !installDismissed && (
         <div className="mt-4">
@@ -119,14 +124,16 @@ export function LandingPage() {
 
       {rounds.length > 0 && (
         <div className="mt-8">
-          <h2 className="mb-3 text-sm font-medium text-cream/70">Dernières parties</h2>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-widest text-cream/50">
+            Dernières parties
+          </h2>
           <div className="space-y-2">
             {rounds.map((round) => (
               <div
                 key={round.id}
-                className="flex items-center justify-between rounded-lg bg-cream/5 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl bg-cream/5 px-4 py-3"
               >
-                <span className="text-sm text-cream/70">
+                <span className="text-sm text-cream/60">
                   {new Date(round.startedAt).toLocaleDateString("fr-FR")}
                 </span>
                 <span className="font-mono text-lg font-medium text-cream">
