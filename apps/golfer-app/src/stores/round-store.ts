@@ -16,7 +16,9 @@ interface RoundState {
   currentHole: number;
   scores: Map<number, LocalScore>;
   saving: boolean;
+  loading: boolean;
   error: string | null;
+  _version: number;
 }
 
 interface RoundActions {
@@ -37,7 +39,9 @@ const initialState: RoundState = {
   currentHole: 1,
   scores: new Map(),
   saving: false,
+  loading: false,
   error: null,
+  _version: 0,
 };
 
 function toggleTriState(current: boolean | null): boolean | null {
@@ -118,6 +122,7 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
     const score = state.scores.get(hole);
     if (!score) return;
 
+    const version = state._version;
     set({ saving: true, error: null });
 
     try {
@@ -128,6 +133,7 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
         const round = await apiClient.post<RoundWithScoresResponse>("/rounds", {
           courseId: state.courseId,
         });
+        if (get()._version !== version) return;
         roundId = round.id;
         set({ roundId });
       }
@@ -140,6 +146,8 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
         greenInRegulation: score.greenInRegulation,
       });
 
+      if (get()._version !== version) return;
+
       // Mark as synced
       const scores = new Map(get().scores);
       const current = scores.get(hole);
@@ -150,13 +158,14 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
         set({ saving: false });
       }
     } catch (err) {
+      if (get()._version !== version) return;
       const message = err instanceof Error ? err.message : "Sauvegarde échouée";
       set({ saving: false, error: message });
     }
   },
 
   loadRound: async (roundId) => {
-    set({ saving: true, error: null });
+    set({ loading: true, error: null });
 
     try {
       const round = await apiClient.get<RoundWithScoresResponse>(`/rounds/${roundId}`);
@@ -172,12 +181,12 @@ export const useRoundStore = create<RoundState & RoundActions>()((set, get) => (
         });
       }
 
-      set({ roundId, courseId: round.courseId, scores, saving: false });
+      set({ roundId, courseId: round.courseId, scores, loading: false });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Chargement échoué";
-      set({ saving: false, error: message });
+      set({ loading: false, error: message });
     }
   },
 
-  reset: () => set({ ...initialState, scores: new Map() }),
+  reset: () => set({ ...initialState, scores: new Map(), _version: get()._version + 1 }),
 }));

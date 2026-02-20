@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth-store";
 afterEach(cleanup);
 
 beforeEach(() => {
+  localStorage.clear();
   useAuthStore.getState().reset();
 });
 
@@ -40,5 +41,19 @@ describe("AuthGuard", () => {
     render(<TestApp initialRoute="/gps" />);
     expect(screen.getByText("GPS Screen")).toBeInTheDocument();
     expect(screen.queryByText("Login Page")).not.toBeInTheDocument();
+  });
+
+  test("renders nothing when store has not hydrated", () => {
+    // Temporarily mock hasHydrated to return false
+    const originalHasHydrated = useAuthStore.persist.hasHydrated;
+    useAuthStore.persist.hasHydrated = () => false;
+
+    const { container } = render(<TestApp initialRoute="/gps" />);
+    // Should render nothing — no redirect, no content
+    expect(screen.queryByText("Login Page")).not.toBeInTheDocument();
+    expect(screen.queryByText("GPS Screen")).not.toBeInTheDocument();
+    expect(container.innerHTML).toBe("");
+
+    useAuthStore.persist.hasHydrated = originalHasHydrated;
   });
 });
