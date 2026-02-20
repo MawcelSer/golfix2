@@ -108,6 +108,9 @@ export async function buildApp() {
 
       const { teeTimeRoutes } = await import("./tee-times/tee-time-routes");
       await api.register(teeTimeRoutes, { prefix: "/courses/:courseId/tee-times" });
+
+      const { courseSettingsRoutes } = await import("./courses/course-settings-routes");
+      await api.register(courseSettingsRoutes, { prefix: "/courses/:courseId" });
     },
     { prefix: "/api/v1" },
   );
