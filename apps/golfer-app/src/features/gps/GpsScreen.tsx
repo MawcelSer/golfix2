@@ -7,7 +7,7 @@ import { useSocket } from "@/hooks/use-socket";
 import { useCourseStore } from "@/stores/course-store";
 import { useSessionStore } from "@/stores/session-store";
 import { computeHoleDistances } from "./distance-calculator";
-import { DistanceTriptych } from "./DistanceCard";
+import { DistanceTriptych } from "./DistanceTriptych";
 import { HoleSelector } from "./HoleSelector";
 import { HoleIllustration } from "./HoleIllustration";
 
@@ -116,8 +116,6 @@ export function GpsScreen() {
   // Prepare illustration props
   const teePos = hole?.teePosition ? { lat: hole.teePosition.y, lng: hole.teePosition.x } : null;
   const greenPos = hole?.greenCenter ? { lat: hole.greenCenter.y, lng: hole.greenCenter.x } : null;
-  const greenFront = hole?.greenFront ? { lat: hole.greenFront.y, lng: hole.greenFront.x } : null;
-  const greenBack = hole?.greenBack ? { lat: hole.greenBack.y, lng: hole.greenBack.x } : null;
   const playerPos = position ? { lat: position.lat, lng: position.lng } : null;
 
   return (
@@ -140,8 +138,6 @@ export function GpsScreen() {
           distanceMeters={hole?.distanceMeters ?? 0}
           teePosition={teePos}
           greenCenter={greenPos}
-          greenFront={greenFront}
-          greenBack={greenBack}
           hazards={hole?.hazards ?? []}
           playerPosition={playerPos}
           distanceToCenter={distances.center}

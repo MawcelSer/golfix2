@@ -11,8 +11,6 @@ interface HoleIllustrationProps {
   distanceMeters: number;
   teePosition: LatLng | null;
   greenCenter: LatLng | null;
-  greenFront: LatLng | null;
-  greenBack: LatLng | null;
   hazards: HazardData[];
   playerPosition: LatLng | null;
   distanceToCenter: number | null;
@@ -23,6 +21,7 @@ const SVG_HEIGHT = 400;
 const TEE_Y = 360;
 const GREEN_Y = 60;
 const CENTER_X = 100;
+const LATERAL_SCALE = 800;
 
 function toSvgY(tee: LatLng, green: LatLng, point: LatLng): number {
   const totalDist = Math.sqrt((green.lat - tee.lat) ** 2 + (green.lng - tee.lng) ** 2);
@@ -40,7 +39,7 @@ function toSvgX(tee: LatLng, green: LatLng, point: LatLng): number {
   const px = point.lng - tee.lng;
   const py = point.lat - tee.lat;
   const cross = (-dy * px + dx * py) / len;
-  return CENTER_X + cross * 800;
+  return CENTER_X + cross * LATERAL_SCALE;
 }
 
 export function HoleIllustration({
@@ -69,6 +68,10 @@ export function HoleIllustration({
   const playerSvgY = playerPosition ? toSvgY(teePosition, greenCenter, playerPosition) : null;
   const playerSvgX = playerPosition ? toSvgX(teePosition, greenCenter, playerPosition) : null;
 
+  // Scope gradient IDs to avoid collision if multiple instances render
+  const bgId = `bg-grad-${holeNumber}`;
+  const glowId = `green-glow-${holeNumber}`;
+
   return (
     <svg
       viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -76,18 +79,18 @@ export function HoleIllustration({
       aria-label={`Trou ${holeNumber}`}
     >
       <defs>
-        <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={bgId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#1a4a25" />
           <stop offset="100%" stopColor="#0f2818" />
         </linearGradient>
-        <radialGradient id="green-glow" cx="50%" cy="50%" r="50%">
+        <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#5cb85c" stopOpacity="0.6" />
           <stop offset="100%" stopColor="#2d8b47" stopOpacity="0" />
         </radialGradient>
       </defs>
 
       {/* Background */}
-      <rect width={SVG_WIDTH} height={SVG_HEIGHT} fill="url(#bg-grad)" />
+      <rect width={SVG_WIDTH} height={SVG_HEIGHT} fill={`url(#${bgId})`} />
 
       {/* Fairway */}
       <path
@@ -97,7 +100,7 @@ export function HoleIllustration({
       />
 
       {/* Green */}
-      <ellipse cx={CENTER_X} cy={GREEN_Y} rx={22} ry={14} fill="url(#green-glow)" />
+      <ellipse cx={CENTER_X} cy={GREEN_Y} rx={22} ry={14} fill={`url(#${glowId})`} />
       <ellipse cx={CENTER_X} cy={GREEN_Y} rx={16} ry={10} fill="#5cb85c" opacity="0.8" />
 
       {/* Flag */}

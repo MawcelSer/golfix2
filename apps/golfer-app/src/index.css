@@ -33,4 +33,6 @@
 
 .animate-gps-pulse {
   animation: gps-pulse 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
