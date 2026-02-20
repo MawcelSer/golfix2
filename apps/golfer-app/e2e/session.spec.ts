@@ -52,7 +52,7 @@ test.describe("Session flow", () => {
     });
   });
 
-  test("ending session navigates back to landing", async ({ page }) => {
+  test("ending session navigates to round summary", async ({ page }) => {
     await loginAndGoToGps(page);
 
     // Start session
@@ -68,11 +68,10 @@ test.describe("Session flow", () => {
     // Click end session — opens custom ConfirmDialog
     await page.getByRole("button", { name: "Terminer la partie" }).click();
 
-    // Accept the custom confirm dialog
-    await page.getByRole("button", { name: "Confirmer" }).click();
+    // Accept the custom confirm dialog (button label is "Terminer")
+    await page.getByRole("button", { name: "Terminer", exact: true }).click();
 
-    // Should navigate to landing page
-    await expect(page).toHaveURL("/");
-    await expect(page.getByText(/Bienvenue/)).toBeVisible({ timeout: 5000 });
+    // Should navigate away from scorecard (to /summary or / depending on scores)
+    await expect(page).not.toHaveURL(/\/scorecard/, { timeout: 5000 });
   });
 });

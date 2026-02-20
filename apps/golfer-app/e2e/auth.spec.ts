@@ -42,7 +42,7 @@ test.describe("Login flow", () => {
 
     await page.goto("/login");
     await page.getByLabel("Email").fill("wrong@email.com");
-    await page.getByLabel("Mot de passe").fill("wrong");
+    await page.getByLabel("Mot de passe").fill("wrongpassword");
     await page.getByRole("button", { name: "Connexion" }).click();
 
     await expect(page.getByText("Email ou mot de passe incorrect")).toBeVisible();
