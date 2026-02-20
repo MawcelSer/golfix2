@@ -68,6 +68,19 @@ export async function getManagedCourses(userId: string): Promise<ManagedCourse[]
   return rows;
 }
 
+// ── getCourseDataById ────────────────────────────────────────────────
+
+export async function getCourseDataById(courseId: string): Promise<CourseData | null> {
+  const row = await db
+    .select({ slug: courses.slug })
+    .from(courses)
+    .where(eq(courses.id, courseId))
+    .limit(1);
+
+  if (!row[0]) return null;
+  return getCourseData(row[0].slug);
+}
+
 // ── locateCourse ────────────────────────────────────────────────────
 
 /**

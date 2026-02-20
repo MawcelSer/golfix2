@@ -11,6 +11,10 @@ export const courseSlugParamSchema = z.object({
   slug: z.string().min(1).max(100),
 });
 
+export const courseIdParamSchema = z.object({
+  courseId: z.string().uuid(),
+});
+
 // ── Inferred types ──────────────────────────────────────────────────
 
 export type LocateInput = z.infer<typeof locateSchema>;
