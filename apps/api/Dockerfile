@@ -46,4 +46,5 @@ COPY apps/api/drizzle.config.ts apps/api/drizzle.config.ts
 EXPOSE 3000
 ENV NODE_ENV=production
 
-CMD ["node", "--import", "tsx", "apps/api/dist/server.js"]
+WORKDIR /app/apps/api
+CMD ["node", "--import", "tsx", "dist/server.js"]
