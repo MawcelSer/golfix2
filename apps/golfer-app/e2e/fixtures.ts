@@ -151,6 +151,47 @@ export async function mockApi(page: Page) {
       body: JSON.stringify({ processed: 0 }),
     }),
   );
+
+  // Round creation (lazy, triggered on first score save)
+  await page.route("**/api/v1/rounds", (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "round-1",
+          userId: "user-1",
+          courseId: "course-1",
+          sessionId: "session-1",
+          status: "in_progress",
+          startedAt: new Date().toISOString(),
+          finishedAt: null,
+          totalScore: null,
+          totalPutts: null,
+          scores: [],
+        }),
+      });
+    }
+    return route.continue();
+  });
+
+  // Score upsert
+  await page.route("**/api/v1/rounds/*/scores", (route) => {
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: `score-${body.holeNumber}`,
+        roundId: "round-1",
+        holeNumber: body.holeNumber,
+        strokes: body.strokes,
+        putts: body.putts ?? null,
+        fairwayHit: body.fairwayHit ?? null,
+        greenInRegulation: body.greenInRegulation ?? null,
+      }),
+    });
+  });
 }
 
 /** Set auth tokens in Zustand store via browser context to bypass login. */
