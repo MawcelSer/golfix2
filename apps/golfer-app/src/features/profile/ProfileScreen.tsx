@@ -4,6 +4,11 @@ import { useAuthStore } from "@/stores/auth-store";
 import { apiClient } from "@/services/api-client";
 import type { UserPrefsResponse, NotificationPrefs } from "@golfix/shared";
 
+function getInitial(name: string | undefined): string {
+  if (!name) return "?";
+  return name.charAt(0).toUpperCase();
+}
+
 export function ProfileScreen() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -57,16 +62,23 @@ export function ProfileScreen() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 pt-6">
-      <h1 className="text-xl font-semibold text-cream">Profil</h1>
+      <h1 className="font-display text-xl text-cream">Profil</h1>
 
-      {/* User info */}
-      <div className="rounded-xl bg-cream/5 px-4 py-3">
-        <p className="text-lg font-medium text-cream">{user?.displayName ?? "\u2014"}</p>
-        {user?.email && <p className="text-sm text-cream/50">{user.email}</p>}
+      {/* User info with avatar */}
+      <div className="flex items-center gap-4 rounded-2xl bg-cream/5 px-4 py-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-mid">
+          <span className="font-display text-lg text-cream">
+            {getInitial(user?.displayName)}
+          </span>
+        </div>
+        <div>
+          <p className="text-lg font-medium text-cream">{user?.displayName ?? "\u2014"}</p>
+          {user?.email && <p className="text-sm text-cream/50">{user.email}</p>}
+        </div>
       </div>
 
       {/* Notification prefs */}
-      <div className="rounded-xl bg-cream/5 px-4 py-3">
+      <div className="rounded-2xl bg-cream/5 px-4 py-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-cream">Rappels de rythme</p>
