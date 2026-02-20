@@ -18,12 +18,8 @@ vi.mock("socket.io-client", () => {
 
 import { io } from "socket.io-client";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockSocket =
-  (io as any).__mockSocket ?? (io as ReturnType<typeof vi.fn>).mock.results[0]?.value;
-
 function getSocket() {
-  return (io as ReturnType<typeof vi.fn>).mock.results[0]?.value ?? mockSocket;
+  return (io as ReturnType<typeof vi.fn>).mock.results[0]?.value;
 }
 
 describe("DashboardSocketClient", () => {

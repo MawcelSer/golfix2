@@ -129,7 +129,15 @@ export async function buildApp() {
   // ── WebSocket (Socket.io) ───────────────────────────────────
 
   const { setupSocketServer } = await import("./ws/socket-server");
-  setupSocketServer(app);
+  const io = setupSocketServer(app);
+
+  // Decorate app with io for use by pace engine plugin
+  app.decorate("io", io);
+
+  // ── Pace engine (real-time dashboard aggregation) ──────────
+
+  const { paceEnginePlugin } = await import("./pace/pace-engine-plugin");
+  await app.register(paceEnginePlugin);
 
   return app;
 }
