@@ -73,6 +73,38 @@ describe("LoginScreen", () => {
     expect(useAuthStore.getState().user?.email).toBe("t@t.com");
   });
 
+  test("shows validation error for short password", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LoginScreen />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText(/email/i), "valid@email.com");
+    await user.type(screen.getByLabelText(/mot de passe/i), "short");
+    await user.click(screen.getByRole("button", { name: /connexion/i }));
+
+    expect(await screen.findByText(/8 caractères minimum/i)).toBeInTheDocument();
+  });
+
+  test("shows validation error for empty email", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LoginScreen />
+      </MemoryRouter>,
+    );
+
+    // Empty email bypasses native validation in jsdom — Zod catches it
+    await user.type(screen.getByLabelText(/mot de passe/i), "password123");
+    // Remove required to test Zod validation directly
+    screen.getByLabelText(/email/i).removeAttribute("required");
+    await user.click(screen.getByRole("button", { name: /connexion/i }));
+
+    expect(await screen.findByText(/email invalide/i)).toBeInTheDocument();
+  });
+
   test("shows error on failed login", async () => {
     const { apiClient } = await import("@/services/api-client");
     vi.mocked(apiClient.post).mockRejectedValue(new Error("Identifiants invalides"));
@@ -85,7 +117,7 @@ describe("LoginScreen", () => {
     );
 
     await user.type(screen.getByLabelText(/email/i), "bad@t.com");
-    await user.type(screen.getByLabelText(/mot de passe/i), "wrong");
+    await user.type(screen.getByLabelText(/mot de passe/i), "wrongpassword123");
     await user.click(screen.getByRole("button", { name: /connexion/i }));
 
     expect(await screen.findByText(/identifiants invalides/i)).toBeInTheDocument();

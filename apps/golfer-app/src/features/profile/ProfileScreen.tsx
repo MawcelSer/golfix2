@@ -31,7 +31,7 @@ export function ProfileScreen() {
       .catch((err: unknown) => {
         if (stale) return;
         console.warn("Failed to load preferences:", err);
-        setPaceReminders(true); // fallback to default on error
+        setPaceReminders(null); // disable toggle on error
         setLoading(false);
       });
 

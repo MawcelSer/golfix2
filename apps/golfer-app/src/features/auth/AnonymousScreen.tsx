@@ -4,8 +4,12 @@ import { apiClient } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AuthResponse } from "@golfix/shared";
 
-function generateDeviceId(): string {
-  return `device-${crypto.randomUUID().slice(0, 12)}`;
+function getOrCreateDeviceId(): string {
+  const existing = localStorage.getItem("golfix-device-id");
+  if (existing) return existing;
+  const id = `device-${crypto.randomUUID().slice(0, 12)}`;
+  localStorage.setItem("golfix-device-id", id);
+  return id;
 }
 
 export function AnonymousScreen() {
@@ -23,7 +27,7 @@ export function AnonymousScreen() {
     try {
       const response = await apiClient.post<AuthResponse>("/auth/anonymous", {
         displayName,
-        deviceId: generateDeviceId(),
+        deviceId: getOrCreateDeviceId(),
       });
       setAuth(response);
       navigate("/gps");

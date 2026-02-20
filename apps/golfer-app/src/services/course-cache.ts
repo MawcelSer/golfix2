@@ -19,7 +19,7 @@ export async function getCachedCourse(slug: string): Promise<CourseData | null> 
 
     const age = Date.now() - entry.cachedAt;
     if (age > CACHE_TTL_MS) {
-      await del(cacheKey(slug)).catch(() => {});
+      await del(cacheKey(slug)).catch((err) => console.warn("[course-cache] Failed to delete expired entry:", err));
       return null;
     }
 
@@ -47,20 +47,5 @@ export async function clearCachedCourse(slug: string): Promise<void> {
     await del(cacheKey(slug));
   } catch (err) {
     console.warn(`[course-cache] Failed to clear cache for "${slug}":`, err);
-  }
-}
-
-export async function isCacheValid(slug: string, currentVersion: number): Promise<boolean> {
-  try {
-    const entry = await get<CachedCourse>(cacheKey(slug));
-    if (!entry) return false;
-
-    const age = Date.now() - entry.cachedAt;
-    if (age > CACHE_TTL_MS) return false;
-
-    return entry.data.dataVersion === currentVersion;
-  } catch (err) {
-    console.warn(`[course-cache] Failed to validate cache for "${slug}":`, err);
-    return false;
   }
 }

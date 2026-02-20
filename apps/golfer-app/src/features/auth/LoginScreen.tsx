@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { apiClient } from "@/services/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AuthResponse } from "@golfix/shared";
+
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(8, "8 caractères minimum"),
+});
 
 export function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -15,6 +21,13 @@ export function LoginScreen() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      setError(result.error.errors[0]!.message);
+      return;
+    }
+
     setLoading(true);
 
     try {
