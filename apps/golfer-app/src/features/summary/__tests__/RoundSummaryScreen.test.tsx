@@ -135,6 +135,19 @@ describe("RoundSummaryScreen", () => {
     expect(rows).toHaveLength(3);
   });
 
+  it("shows loading message when scores exist but courseData is null", () => {
+    mockScores.set(1, makeScore(4, 2));
+
+    render(
+      <MemoryRouter>
+        <RoundSummaryScreen />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Chargement du parcours…")).toBeInTheDocument();
+    expect(mockNavigate).not.toHaveBeenCalledWith("/", { replace: true });
+  });
+
   it("resets stores and navigates home on button click", () => {
     mockCourseData = {
       id: "c1",

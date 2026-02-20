@@ -36,7 +36,7 @@ test.describe("Login flow", () => {
       route.fulfill({
         status: 401,
         contentType: "application/json",
-        body: JSON.stringify({ message: "Email ou mot de passe incorrect" }),
+        body: JSON.stringify({ error: "Email ou mot de passe incorrect", statusCode: 401 }),
       }),
     );
 

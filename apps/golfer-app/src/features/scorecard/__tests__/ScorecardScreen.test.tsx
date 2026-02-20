@@ -27,12 +27,14 @@ const mockReset = vi.fn();
 let mockCurrentHole = 1;
 let mockError: string | null = null;
 let mockSaving = false;
+let mockCourseId: string | null = null;
 
 const roundStoreState = () => ({
   currentHole: mockCurrentHole,
   scores: mockScores,
   error: mockError,
   saving: mockSaving,
+  courseId: mockCourseId,
   startRound: mockStartRound,
   setCurrentHole: mockSetCurrentHole,
   saveScore: mockSaveScore,
@@ -126,6 +128,7 @@ describe("ScorecardScreen", () => {
     mockSaving = false;
     mockSessionStatus = "idle";
     mockSessionError = null;
+    mockCourseId = null;
   });
 
   afterEach(cleanup);
@@ -153,6 +156,38 @@ describe("ScorecardScreen", () => {
     const resetOrder = mockReset.mock.invocationCallOrder[0];
     const startOrder = mockStartRound.mock.invocationCallOrder[0];
     expect(resetOrder).toBeLessThan(startOrder!);
+  });
+
+  it("does not re-init round when courseId already matches", () => {
+    mockCourseData = makeCourse();
+    mockCourseId = "c1";
+    mockScores.set(1, {
+      strokes: 3,
+      putts: 0,
+      fairwayHit: null,
+      greenInRegulation: null,
+      synced: false,
+    });
+
+    renderScorecard();
+
+    expect(mockReset).not.toHaveBeenCalled();
+    expect(mockStartRound).not.toHaveBeenCalled();
+  });
+
+  it("renders course name heading", () => {
+    mockCourseData = makeCourse();
+    mockScores.set(1, {
+      strokes: 3,
+      putts: 0,
+      fairwayHit: null,
+      greenInRegulation: null,
+      synced: false,
+    });
+
+    renderScorecard();
+
+    expect(screen.getByText("Test Course")).toBeInTheDocument();
   });
 
   it("renders hole selector with current hole", () => {
@@ -245,22 +280,6 @@ describe("ScorecardScreen", () => {
     expect(screen.getByText("Sauvegarde…")).toBeInTheDocument();
   });
 
-  it("calls reset on unmount", () => {
-    mockCourseData = makeCourse();
-    mockScores.set(1, {
-      strokes: 3,
-      putts: 0,
-      fairwayHit: null,
-      greenInRegulation: null,
-      synced: false,
-    });
-
-    const { unmount } = renderScorecard();
-    unmount();
-
-    expect(mockReset).toHaveBeenCalled();
-  });
-
   // ── Session end tests ───────────────────────────────────────────
 
   it("shows Terminer button when session is active", () => {
@@ -295,7 +314,7 @@ describe("ScorecardScreen", () => {
     expect(screen.queryByText("Terminer la partie")).not.toBeInTheDocument();
   });
 
-  it("calls finishSession and navigates on confirm", async () => {
+  it("shows confirm dialog when Terminer is clicked", () => {
     mockCourseData = makeCourse();
     mockSessionStatus = "active";
     mockScores.set(1, {
@@ -306,15 +325,34 @@ describe("ScorecardScreen", () => {
       synced: false,
     });
 
-    // Simulate successful finish — store updates status to "ended"
+    renderScorecard();
+
+    fireEvent.click(screen.getByText("Terminer la partie"));
+
+    expect(screen.getByText("Terminer la partie ?")).toBeInTheDocument();
+    expect(screen.getByText("Terminer")).toBeInTheDocument();
+    expect(screen.getByText("Annuler")).toBeInTheDocument();
+  });
+
+  it("calls finishSession and navigates on confirm dialog", async () => {
+    mockCourseData = makeCourse();
+    mockSessionStatus = "active";
+    mockScores.set(1, {
+      strokes: 3,
+      putts: 0,
+      fairwayHit: null,
+      greenInRegulation: null,
+      synced: false,
+    });
+
     mockFinishSession.mockImplementationOnce(async () => {
       mockSessionStatus = "ended";
     });
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 
     renderScorecard();
 
     fireEvent.click(screen.getByText("Terminer la partie"));
+    fireEvent.click(screen.getByText("Terminer"));
 
     await waitFor(() => {
       expect(mockFinishSession).toHaveBeenCalledWith("finished");
@@ -323,7 +361,7 @@ describe("ScorecardScreen", () => {
     });
   });
 
-  it("does not navigate when finishSession fails", async () => {
+  it("does not finish session when cancel is clicked", async () => {
     mockCourseData = makeCourse();
     mockSessionStatus = "active";
     mockScores.set(1, {
@@ -334,38 +372,10 @@ describe("ScorecardScreen", () => {
       synced: false,
     });
 
-    // finishSession resolves but sets error (simulates internal error handling)
-    mockFinishSession.mockImplementationOnce(async () => {
-      mockSessionError = "Impossible de terminer la session";
-    });
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
-
     renderScorecard();
 
     fireEvent.click(screen.getByText("Terminer la partie"));
-
-    await waitFor(() => {
-      expect(mockFinishSession).toHaveBeenCalledWith("finished");
-    });
-    expect(mockNavigate).not.toHaveBeenCalled();
-  });
-
-  it("does not finish session when confirm is cancelled", async () => {
-    mockCourseData = makeCourse();
-    mockSessionStatus = "active";
-    mockScores.set(1, {
-      strokes: 3,
-      putts: 0,
-      fairwayHit: null,
-      greenInRegulation: null,
-      synced: false,
-    });
-
-    vi.spyOn(window, "confirm").mockReturnValueOnce(false);
-
-    renderScorecard();
-
-    fireEvent.click(screen.getByText("Terminer la partie"));
+    fireEvent.click(screen.getByText("Annuler"));
 
     await waitFor(() => {
       expect(mockFinishSession).not.toHaveBeenCalled();

@@ -92,6 +92,27 @@ export function GpsScreen() {
     );
   }
 
+  // Session finishing — show spinner
+  if (sessionStatus === "finishing") {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-cream/70">Fin de session…</p>
+      </div>
+    );
+  }
+
+  // Session ended — offer link to summary
+  if (sessionStatus === "ended") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 px-6">
+        <p className="text-cream/70">Session terminée</p>
+        <a href="/summary" className="rounded-xl bg-green-mid px-6 py-3 text-sm font-medium text-cream">
+          Voir le résumé
+        </a>
+      </div>
+    );
+  }
+
   // Session confirmation — show before starting GPS
   if (sessionStatus === "idle" || sessionStatus === "starting") {
     return (

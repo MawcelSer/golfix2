@@ -92,8 +92,17 @@ export function useCourseData(slug: string | null): UseCourseDataResult {
     };
   }, [fetchCourse]);
 
+  const staleRef = useRef(false);
+
+  useEffect(() => {
+    staleRef.current = false;
+    return () => {
+      staleRef.current = true;
+    };
+  }, [slug]);
+
   const refetch = useCallback(() => {
-    fetchCourse(false, () => false);
+    fetchCourse(false, () => staleRef.current);
   }, [fetchCourse]);
 
   return { courseData, loading, error, refetch };
